@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="mobileoptimized" content="300">
+  <meta name="HandheldFriendly" content="true">
+
+  <title>QR-Link &mdash; Encurtador de URL, Criador e Leitor de QRCode</title>
+  <meta name="description" content="Encurtador de URL, Criador e Leitor de QRCode gratuito, simples e que respeita a sua privacidade.">
+  <meta name="keywords" content="Encurtador de URL, Encurtador de Link, Criador de QRCode, Leitor de QRCode">
+  <meta name="Modified" content="2022-04-03 15:30:00">
+  <meta name="robots" content="nofollow, noarchive, noodp, noydir">
+  
+<!-- https://dnschecker.org/open-graph-preview-generate-metatags.php
+    Facebook Meta Tags -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://qrlink.app.br/">
+  <meta property="og:title" content="Encurtador de URL, Criador e Leitor de QRCode">
+  <meta property="og:description" content="Encurtador de URL, Criador e Leitor de QRCode gratuito, simples e que respeita a sua privacidade.">
+
+  <!-- Twitter Meta Tags -->
+  <meta property="twitter:url" content="https://qrlink.app.br/">
+  <meta property="twitter:title" content="Encurtador de URL, Criador e Leitor de QRCode">
+  <meta property="twitter:description" content="Encurtador de URL, Criador e Leitor de QRCode gratuito, simples e que respeita a sua privacidade.">
+
+  <!-- icons8.com.br/icons/set/search -->
+  <link href="img/icons8-3-search-32.png" rel="icon">
+  <link href="img/icons8-3-search-32.png" rel="apple-touch-icon">
+
+  <link href="css/style.css" rel="stylesheet">
+  <link href="css/fonts.css" rel="stylesheet">
+</head>
+
+<body>
+
+
+    <div class="box">
+        <h2 class="title">Encurtador de Links</h2>
+
+        <div class="box_input">
+          <input class="input_url" id="link_inputURL" type="text" placeholder="Coloque aqui o link">
+          <p  class="urlCurta_gerada" id='link_URLmenor_gerada'></p>
+        </div>
+        
+        <div class="box_button">
+          <button class="btn" id="btn_linkMenor">Encurtar</button>
+          <button class="btn btn_copiar" id="btn_copiarURL">Copiar</button>
+        </div>
+
+        <div class="info_dadoSalvos" id="link_mostrarQTD_dadoSalvos"></div>
+        
+    </div>
+
+
+<!-- Firebase usado no encurtador de links -->
+<script type="module" src="js/link/link.js"></script>
+<script>
+let copiar_URLmenor = document.getElementById("link_URLmenor_gerada");
+let copiar_URLbtn = document.getElementById("btn_copiarURL");
+let copiar_textoSucesso = "<i>Link copiado para a área de transferência</i>";
+copiar_URLbtn.style = "cursor: pointer;";
+
+
+async function copiarTexto(event){ // https://flaviocopes.com/clipboard-api/
+  if (!navigator.clipboard) {      // Clipboard API not available
+    return
+  }
+  const text = event.target.innerText
+  try {
+
+    if (event.target.tagName == "P"){
+      await navigator.clipboard.writeText(text)
+
+    } else if (event.target.tagName == "BUTTON"){
+        await navigator.clipboard.writeText(copiar_URLmenor.innerText)
+
+    } else { console.log("event.target.tagName: ", event.target.tagName) }
+    
+    // LINHA ABAIXO: coloca na tela a string gerada para o link curto
+    copiar_URLmenor.innerHTML = copiar_textoSucesso;
+  } catch (err) {
+    console.error('Falha ao copiar: ', err)
+  }
+
+}
+copiar_URLmenor.addEventListener('click', async event => { copiarTexto(event); })
+copiar_URLbtn.addEventListener('click', async event => { copiarTexto(event); })
+</script>
+
+</body>
+</html>
