@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html>
 <body>
-    
     <p id="status"></p>
 <script>
 /*
@@ -20,9 +19,9 @@ const checkOnlineStatus = async () => {
 
   try {
     const online = await fetch(check_connection, {
-        cache: 'no-cache',
+        // cache: 'no-cache',
         mode: 'no-cors',
-        method: 'GET',
+        // method: 'GET',
     });
     //const online = await fetch(check_connection);
     return online.status >= 200 && online.status < 300; // either true or false
