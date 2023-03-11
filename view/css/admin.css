@@ -1,0 +1,147 @@
+/*
+  CSS do Menu da Página
+*/
+ul {
+  bottom: 0;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  z-index: 2;
+  background-color: #333; /* #111; */
+  list-style-type: none;
+  display: flex; /* Adicionar display: flex para usar Flexbox */
+  overflow: hidden;
+  position: fixed;
+  color: white;
+}
+
+li { /* Adicionar flex: 1 para que cada item tenha igual espaço */
+  flex: 5;
+}
+
+@media only screen and (max-device-width: 1434px) {
+  li.sysinfo { display: none; }
+}
+
+li.sysinfo { flex: 2; }
+li.action { flex: 1; }
+
+li.action img {
+  max-height: 40px;
+  vertical-align: middle;
+}
+
+ul li.action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+li.action a { padding: 0; }
+li.action { transition: 0.3s; }
+li.action:hover {
+  background-color: #dddddd !important; /* white */
+  border-top: 5px solid #333;
+}
+
+li a, li p {
+  /* color: white; */
+  display: block;
+  text-align: center;
+  padding: 14px 16px;
+  transition: 0.3s;
+  text-decoration: none;
+}
+
+.active {
+  background-color: #dddddd;
+  font-weight: bold;
+  color: black;
+}
+
+
+/*
+  CSS da Tabela de Links
+*/
+.center {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.pesquisa_container {
+  display: flex;
+  width: 100%;
+  justify-content: center; /* space-between; */
+  align-items: center;
+  position: relative;
+}
+
+.pesquisa_container input {
+  width: 50%;
+  padding-right: 5px;
+}
+
+.pesquisa_apagarItens {
+  display: none; /* comportamento padrão, veja link.js */
+  margin-left: 5px;
+}
+
+.pesquisa_apagarItens img {
+  max-height: 19px;
+}
+
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  margin-bottom: 100px;
+  width: 100%;
+}
+
+tr th {
+  background-color: black;
+  border: 1px solid black;
+  color: white;
+  position: sticky; /* deixar o header fixo no topo */
+  position: -webkit-sticky;
+  z-index: 2;
+  top: 0;
+}
+
+tr:nth-child(even) { background-color: #dddddd; }
+tr:nth-child(even):hover, tr:nth-child(odd):hover {
+  background-color: #ffff85;
+  font-weight: bold;
+}
+
+th, td {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+td a { /* link 'href' */
+  color: black;
+  text-decoration: none;
+}
+
+td a:hover {
+  text-decoration: underline;
+}
+
+button.table {
+  background-color: transparent;
+  color: black;
+  opacity: 0.3;
+  transition: 0.3s;
+  display: inline-block;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+button.table:hover {
+  opacity: 1; /* background-color: #f4511e; */
+  background-color: red;
+  border-radius: 5px;
+  padding: 2px 4px;
+  color: white;
+  font-weight: bold;
+}

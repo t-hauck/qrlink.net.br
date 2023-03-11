@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Allow: /*/*.css
+Allow: /*/*.js
+Disallow: *?*=*
+Disallow: *?*=*&*=*
+Disallow: *?*=*=*
+Disallow: testes
