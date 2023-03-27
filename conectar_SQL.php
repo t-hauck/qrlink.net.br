@@ -22,7 +22,8 @@ class Conectar {
             );
         } catch (PDOException $e) { // } catch (Exception $e) {
             $SQL_error = $e->getMessage();
-            echo "<b>$SQL_error</b> <br>";
+            echo "<b>$SQL_error</b>";
+            exit;
         }
 
     } // function
