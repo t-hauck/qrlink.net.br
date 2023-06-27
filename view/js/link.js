@@ -1,16 +1,8 @@
-let tms1    = 1000; // setTimeout
-
-
-
 ////
 // CÓPIA-COLA DE TEXTO
 // https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/readText#browser_compatibility
-let input_link = document.getElementById("input_linkCompleto");
-let token = document.getElementById("formToken");
-
-let info_textoLido = document.getElementById("info_textoLido");
- 
 async function clipboard_user(action, text){
+    // Navegador Firefox não permite ler o a área de transferência, o IF abaixo verifica apenas se o navegador SUPORTA esta API e o Firefox irá passar nesta validação.
     if (!navigator.clipboard) return; // Clipboard API not available
 
     if (action == "read") { // LEITURA |  APENAS NA PÁGINA PRINCIPAL
@@ -18,68 +10,41 @@ async function clipboard_user(action, text){
         if (permissionStatus.state === 'granted' || permissionStatus.state === 'prompt') { // denied
             try {
                 const clipboardText = await navigator.clipboard.readText();
-
-                info_textoLido.innerText = "Texto da Área de Transferência";
-                info_textoLido.classList.add("fadeIn");
-
-                input_link = clipboardText;                
-                setTimeout( function(){ input_link.focus(); }, tms1)
-                
+                if (clipboardText) { // verifica SE EXISTE conteúdo copiado
+                    Toast.fire({
+                        icon: 'info',
+                        title: 'Texto copiado da área de transferência'
+                    });
+        
+                    setTimeout( function(){ 
+                        input_link.value = clipboardText; // input_link == Importação feita no 'isVisible.js' 
+                        // input_link.focus(); // LINHA SEM EFEITO => HTML tem o atributo autofocus
+                    }, 1000)
+                }
+            
             } catch (err) {
-                console.error('Falha ao ler o conteúdo da área de transferência. \n', '=>           ', err);
+                console.error("Falha ao ler o conteúdo da área de transferência. \n", "=>           ", err);
             }
-        } // else console.error("Permissão Negada para acessar o conteúdo da área de transferência.");
+        } else console.error("Permissão Negada para acessar o conteúdo da área de transferência.");
 
         //permissionStatus.onchange = () => { // Escuta mudanças ao estado de permissão
         //    console.log(permissionStatus.state);
         //};
     }
-    else if (action == "copy" && text !== ""){ // CÓPIA-ESCRITA | [todas] NA PÁGINA PRINCIPAL e INTERFACE ADMINISTRATIVA
+    else if (action == "copy" && text !== ""){ // CÓPIA-ESCRITA
         try {
             await navigator.clipboard.writeText(text); // input_link.textContent = 'Copied to clipboard';
             return true;
-        } catch (err) { // console.error('Falha ao copiar o texto para a área de transferência. \n', err);
-            console.error(err);
+        } catch (err) {
+            console.error("Falha ao copiar o texto para a área de transferência. \n", "=>           ", err);
             return false;
         }
     }
 }
-setTimeout( async function(){
-    if ( !isAdminPage(0) )  clipboard_user("read", " ");
-}, tms1);
-
-
-////
-// Função para validação de texto, se é um link válido ou não
-function validURL(str) {
-    var pattern = new RegExp('^(https?:\\/\\/)?'+           // protocol
-      '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+   // domain name
-      '((\\d{1,3}\\.){3}\\d{1,3}))'+                        // OR ip (v4) address
-      '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+                    // port and path
-      '(\\?[;&a-z\\d%_.~+=-]*)?'+                           // query string
-      '(\\#[-a-z\\d_]*)?$','i');                            // fragment locator
-    return pattern.test(str);
-}
-
-
-function encodeText(data){
-    var formBody = [];
-    for (var property in data) {
-        var encodedKey = encodeURIComponent(property);
-        var encodedValue = encodeURIComponent(data[property]);
-        formBody.push(encodedKey + "=" + encodedValue);
-    }
-    return formBody.join("&");
-}
-
-
-function isAdminPage(action){
-    if ( window.location.pathname === "/qrlink/admin" ){
-        if (action == "reload") setTimeout(() => { location.reload(); }, tms1);
-            return true;
-    } else  return false;
-}
-
+//// Leitura da área de transferência do usuário ao abrir a página => DESABILITADO
+// setTimeout( async function(){
+//     if ( checkCurrentPage("/", "") )  clipboard_user("read", " ");
+// }, 1000);
 
 
 
@@ -90,29 +55,97 @@ function isAdminPage(action){
 
 
 ////
-// PESQUISAR-LINK | INTERFACE ADMINISTRATIVA
-var tabela = document.getElementById('filtro_tabela');
-var admin_input_filtro = document.getElementById('pesquisa_input');
-var pesquisa_apagarItens = document.getElementById("pesquisa_apagarItens");
+// ENCURTAMENTO DE LINKS
+let submit_criarLink = document.getElementById("submit_criarLink");
+if (submit_criarLink) {
+    submit_criarLink.addEventListener('click', function (){
+        if ( checkCurrentPage("/admin", "") ){
+            input_link = prompt(`Informe a URL completa:`);
+            input_lnk = input_link; // para pegar texto do "prompt"
+            input_lnk_senha = ""; //// a página ADMIN não tem campo para salvar senha
+            if (input_lnk == null || input_lnk == undefined || input_lnk == "") return;
+        } else {
+            input_lnk = input_link.value;
+            input_lnk_senha = input_link_senha.value;
+        }
 
-if (tabela) {
-    admin_input_filtro.addEventListener('input', () => {
-        var input_filtro = admin_input_filtro.value;
+        if (input_lnk) { // verifica se foi digitado algo, a URL é validada apenas pelo back-end
+            changeCursor_POST("wait");
 
-        for (var i = 1; i < tabela.rows.length; i++) {
-            var conteudoCelula = tabela.rows[i].cells[1].innerText; // cells[1] == primeira coluna
-            var corresponde = conteudoCelula.toLowerCase().indexOf(input_filtro) >= 0;
-            tabela.rows[i].style.display = corresponde ? '' : 'none';
+            let _data = { // submitToken: token.value
+                linkURL: input_lnk,
+                linkPasswd: input_lnk_senha,
+            };
+            let requestConf = {
+                method: "POST",
+                body: JSON.stringify(_data),
+                headers: {
+                    "CSRF-Token": token.value,
+                    "Content-Type": "application/json; charset=UTF-8"
+                }
+            };
+            // fetch("/link/save", requestConf) // fetch( window.location.host,
+            fetch("/save", requestConf) // fetch( window.location.host,
+                .then((res) => res.json())
+                .then((res) => { // console.log(res[0]);
+        
+                    if (res.status && res.message){ // aqui não é verificado se o "status" recebido é igual a "error"
+                        Swal.fire({
+                            icon: "error",
+                            title: "Erro!",
+                            html: res.message,
+                            showConfirmButton: true,
+                            timer: 10000, // 10 segundos
+                        });
+                    } else {
+                        localStorage_link_save(res.short_code);
 
-            // icone-APAGAR apenas aparece quando houver texto no campo, e resultados para a pesquisa
-            if (input_filtro !== "" && corresponde) {
-                    pesquisa_apagarItens.style.display = "block";
-            } else  pesquisa_apagarItens.style.display = "none";
-
-            console.log(corresponde);
+                        // res[0].forEach(function(item){
+                        let link_curto = window.location.origin + "/" + res.short_code;
+                        let cp_text = clipboard_user("copy", link_curto);
             
-        } // for
-    });
+                        if (checkCurrentPage("/admin", "")) { // a página administrativa é recarregada ao salvar um link
+                            if (cp_text) {
+                                    alert("Compartilhe este endereço: \n" + link_curto + "\n\n" + "O link curto foi copiado para a área de transferência, cole o texto em algum lugar.");
+                            } else  alert("Compartilhe este endereço: \n" + link_curto);
+                                checkCurrentPage("/admin", "reload") 
+                        } else {
+                            userReturn = "Compartilhe este endereço: <br><b>" + link_curto + "</b>";
+
+                            if (cp_text) { // + (se um texto foi informado no campo de *SENHA* MOSTRE um aviso sobre a senha na tela; senão coloque uma string vazia no lugar)
+                                userReturn += "<br><br>O link curto foi copiado, cole o texto em algum lugar." + ( input_lnk_senha ? "<br><br> Caso a URL seja nova no sistema, a <span style='color:red;'>senha</span> escolhida será necessária para todos os acessos ao link curto " + res.short_code + "." : "");
+                                Swal.fire({
+                                    title: "Link Encurtado!",
+                                    html: userReturn,
+                                    icon: "success",
+                                });
+                            } else { // alert(userReturn);
+                                Swal.fire({
+                                    title: "Link Encurtado!",
+                                    html: userReturn,
+                                    icon: "success",
+                                });
+                            }
+                        } // else
+                        // }); // forEach
+                }
+                changeCursor_POST("default");
+            })
+            .catch( error => {
+                changeCursor_POST("default");
+                console.error(error); // Erro ao cadastrar Link
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro!',
+                    html: `Ocorreu um erro ao encurtar o seu link. <br>Dados técnicos estão disponíveis abaixo: <br><br>${error}`,
+                });
+            });
+        } else {
+            input_link.focus();
+        }
+
+        document.body.style.cursor = "default";
+    }); // addEventListener
 }
 
 
@@ -124,142 +157,183 @@ if (tabela) {
 
 
 ////
-// LINK | NA PÁGINA PRINCIPAL e INTERFACE ADMINISTRATIVA
-let submitLink_btn = document.getElementById("submitLink_btn");
-submitLink_btn.addEventListener('click', function (){ // ATENÇÃO: este código foi adaptado para ser usado em duas páginas
-    if ( isAdminPage(0) ){
-        input_link = prompt(`Informe a URL completa:`);
-        input = input_link;
-        if (input == null || input == undefined || input == "") return;
-    } else { input = input_link.value; }
+// REDIRECIONAMENTO DE LINK PROTEGIDO POR SENHA
+let submit_checarSenha = document.getElementById("submit_checarSenha");
+if (submit_checarSenha) {
 
-    if (validURL(input) || validURL(input_link)) { // if (input ) { //// para NÃO validar a URL pelo JavaScript, descomente esta linha 
+    submit_checarSenha.addEventListener("click", evento => {
+        evento.preventDefault();
 
-        let _data = {inputURL: input, submitToken: token.value};
-        let requestConf = {
-            method: "POST",
-            body: encodeText(_data), // body: formBody,
-            headers: {"Content-type": "application/x-www-form-urlencoded; charset=UTF-8"}
-        };
-        fetch( "/link/save", requestConf ) // fetch( window.location.host,
-            .then(res => res.json() )
-            .then(res => { // console.log(res[0]);
+        input_lnk_senha = input_link_senha.value; // existe apenas um ID para input de SENHA
+        if (input_lnk_senha) { // verifica se foi digitado algo
+            changeCursor_POST("wait");
+
+            let _data = { linkPasswd: input_lnk_senha };
+            let requestConf = {
+                method: "POST",
+                body: JSON.stringify(_data),
+                headers: {
+                    "CSRF-Token": token.value,
+                    "Content-Type": "application/json; charset=UTF-8"
+                }
+            };
             
-                // res[0].forEach(function(item){
-                    let link_completo = input; // window.location.href === ... /qrlink/admin
+            fetch(`/checkPassword${window.location.pathname}`, requestConf)
+                .then((res) => res.json())
+                .then((res) => { // console.log(res[0]);
+
+                    if (res.status && res.message){ // aqui não é verificado se o "status" recebido é igual a "error"
+                        Toast.fire({
+                            icon: 'error',
+                            title: res.message
+                        });
+                    } else { // o JAVASCRIPT redireciona o usuario
+                        window.location.href = res.original_url;
+                    }
+                    changeCursor_POST("default");
+            })
+            .catch( error => {
+                changeCursor_POST("default");
+                console.error(error); // Erro ao verificar senha
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro!',
+                    html: `Ocorreu um erro ao verificar a senha. <br>Dados técnicos estão disponíveis abaixo: <br><br>${error}`,
+                });
+            });
+        } else {
+            input_link_senha.focus();
+        }
+    }); // addEventListener
+}
+
+
+
+
+
+
+
+
+
+////
+// ESTATÍSTICAS
+let input_linkEstatisticas = document.getElementById("input_linkEstatisticas");
+let submit_obterEstatisticas = document.getElementById("submit_obterEstatisticas");
+
+if (submit_obterEstatisticas) {
+    submit_obterEstatisticas.addEventListener('click', function (){
+        input = input_linkEstatisticas.value;
+
+        if (input) {
+            changeCursor_POST("wait");
+
+            let _data = { linkCode: input };
+            let requestConf = {
+                method: "POST",
+                body: JSON.stringify(_data),
+                headers: {
+                    "CSRF-Token": token.value,
+                    "Content-Type": "application/json; charset=UTF-8"
+                }
+            };
+            
+            fetch("/getStats", requestConf)
+            .then((res) => res.json())
+            .then((res) => {
+                
+                if (res.status && res.message){ // aqui não é verificado se o "status" recebido é igual a "error"
+                    Swal.fire({
+                        icon: "error",
+                        title: "Erro!",
+                        html: res.message
+                    });
+                }
+                else { // EM CASO DE SUCESSO - O LINK EXISTE NO BANCO DE DADOS
+                    res = res[0];
                     let link_curto = window.location.origin + "/" + res.short_code;
 
-                    input = link_curto;
+                    if (res.short_code_password === null) {
+                            var hasPassword = false;
+                    }else if (res.short_code_password === "-") {
+                        var hasPassword = true;
+                    }else {
+                        var hasPassword = false;
+                    }
+                    
 
-                    let cp_text = clipboard_user("copy", link_curto); 
+                    input_statsResult.classList.remove("fadeOut");
+                    input_statsResult.classList.add("fadeIn");
 
-                    setTimeout(() => {
-                        userReturn = "Link informado: " + link_completo + "\nLink curto: " + link_curto;
-                        if ( cp_text ) {
-                            if (info_textoLido) info_textoLido.style.display = "none";
-                            userReturn += "\n\nO link curto foi copiado para a área de transferência, cole o texto em algum lugar.";
-                            alert(userReturn);
-                        } else {
-                            alert(userReturn);
-                        }
+                    input_statsResult.innerHTML = `
+                        <article class="message is-warning">
+                            <div class="message-header">
+                                <p>
+                                    <a style="text-decoration:none;" href="${link_curto}" target="_blank">${link_curto}</a>
+                                </p>
+                                <button class="delete" aria-label="delete"></button>
+                            </div>
 
-                        isAdminPage("reload");
-                    }, tms1);
-                // }); // forEach
-            })
-        .catch( error => { // alert("Erro ao cadastrar Link");
-            console.error(error);
-        });
-        
-    } else {
-        alert(`Informe um link na caixa de texto e selecione uma das duas opções 'Encurtar Link' ou 'QRCode'. \nUm endereço válido pode começar com "http://" "https://"
-                \nExperimente!
-        `);
-    }
-});
+                            <div class="message-body">
+                                Link Original: &emsp;             <a style="text-decoration:none;" href="${res.url}" target="_blank">${res.url}</a>
+                                <br>
+                                Código Curto: &nbsp;&nbsp;&nbsp;  <a href="${link_curto}" target="_blank">${res.short_code}</a>
+                                <br>
+                                Número de Acessos: &nbsp; <b>${res.access}</b>
+                                <br>
+                                Último Acesso: &nbsp; ${ // NULL = sem acessos                      // - = link do próprio sistema
+                                res.last_access === null ? "-" : (res.last_access == "-" ? res.last_access : convertDateTime(res.last_access) ) }
 
+                                ${  // Número total de tentativas de acesso a links protegidos por senha
+                                    hasPassword === false ? "" : (hasPassword === true ? (res.password_access_attempts === null ? "<br> Número de Tentativas: &nbsp; 0" : "<br> Número de Tentativas: &nbsp;" + res.password_access_attempts) : console.error(res.password_access_attempts) ) }
 
+                                ${  // Data e Horário do último acesso a links protegidos por senha
+                                    hasPassword === false ? "" : (hasPassword === true ? (res.password_last_access_attempt === null ? "<br> Última Tentativa: &nbsp; -" : "<br> Última Tentativa: &nbsp;" + convertDateTime(res.password_last_access_attempt)) : console.error(res.password_last_access_attempt) ) }
 
+                                ${  // Indicador de link protegido por senha
+                                    hasPassword === false ? "" : (hasPassword === true ? "<br><br><span class='icon-text'><span class='icon'><figure class='image'><img class='image' src='/view/img/icons8-password.svg' alt='' title='É necessária uma senha para acessar o link encurtado'></figure></span><span>Link Protegido</span></span>" : console.error(res.short_code_password) )
+                                }
+                            </div>
+                        </article>
+                    `;
 
+/*
+<!--
+                                <br><br>
+                                <div class="field has-addons mt-1" style="justify-content: flex-end;">
+                                    <div class="control">
+                                        <button class="button is-small">Atualizar</button>
+                                    </div>
+                                </div>
+-->
+*/
 
+                    /* Comentário sobre o Último Acesso recebido do banco de dados
 
+                    //  Verifica se é NULL, se for, mostra ZEROS na tela e se não for converte o horário para o fuso do usuário e exibe na tela
+                        Último Acesso: &nbsp; ${ res.last_access === null ? "0000-00-00 00:00:00" : convertDateTime(res.last_access) }
 
+                    //  Verifica se é NULL, se for, mostra ZEROS na tela e se não for verifica se é IGUAL a zeros e caso não seja converte o horário para o fuso do usuário e exibe na tela
+                        Último Acesso: &nbsp; ${ res.last_access === null ? "0000-00-00 00:00:00" : (res.last_access == "0000-00-00 00:00:00" ? res.last_access : convertDateTime(res.last_access) ) }
+                    */
 
+                    // isVisible.js
+                    detectDeleteAction();
+                }
 
-////
-// APAGAR-LINK | INTERFACE ADMINISTRATIVA
-document.querySelectorAll(".apagar_link").forEach(btn => {
-    btn.addEventListener("click", (e) => {
-        let short_code = btn.getAttribute("item-shortCode");
+                changeCursor_POST("default");
+            })  
+            .catch( error => {
+                changeCursor_POST("default");
+                console.error(error); // Erro ao cadastrar Link
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro!',
+                    html: `Falha ao buscar as informações sobre o link ${input}. <br>Dados técnicos estão disponíveis abaixo: <br><br>${error}`
+                });
 
-        if( short_code === "links" ) { // Apagados todos os itens salvos
-            msgError = `Erro ao Apagar Todos os registros do banco de dados `;
-            let confirm_Delete = prompt(`Esta ação irá excluir TODOS os links salvos. Para confirmar, digite "links".`);
-            if (confirm_Delete !== "links") return;
-        } else { // Apagado apenas um único link
-            msgError = `Erro ao Apagar Link "${short_code}" `;
-            let confirm_Delete = prompt(`Para confirmar a exclusão do item, digite seu link curto: `);
-            if (confirm_Delete !== short_code) return;
-        } ////
-
-        let _data = {short_code: short_code, submitToken: token.value};
-        let requestConf = {
-            method: "POST", // DELETE
-            body: encodeText(_data),
-            headers: {"Content-type": "application/x-www-form-urlencoded; charset=UTF-8"},
-            ////
-            // body: JSON.stringify(_data), // 
-            // headers: {"Content-Type": "application/json; charset=UTF-8"},
-        };
-        fetch( "/link/delete", requestConf )
-            .then(response => response.json() )
-            .then(response => {
-
-                if (response.status === "delete") isAdminPage("reload");
-                // delete == OK/Sucesso //// setTimeout(() => { btn.remove; }, 1000);
-            })
-        .catch( error => {
-            console.error(error);
-            alert(msgError);
-        });
-
-    });
-
-});
-
-
-
-
-
-
-
-
-
-////
-// APAGAR-LINKs PELA PESQUISA | INTERFACE ADMINISTRATIVA
-if (pesquisa_apagarItens) {
-    pesquisa_apagarItens.addEventListener("click", (e) => { // Apagados apenas os itens vísiveis na tela
-        msgError = `Erro ao Apagar os itens selecionados do banco de dados `;
-        let confirm_Delete = prompt(`Esta ação irá excluir TODOS os links salvos que tenham relação com o texto "${admin_input_filtro.value}". \nPara confirmar, digite novamente o termo pesquisado.`);
-        if (confirm_Delete !== admin_input_filtro.value) return;
-
-        let _data = {search: admin_input_filtro.value, submitToken: token.value};
-        let requestConf = {
-            method: "POST", // DELETE
-            body: encodeText(_data),
-            headers: {"Content-type": "application/x-www-form-urlencoded; charset=UTF-8"},
-        };
-        fetch( "/link/delete", requestConf )
-        .then(response => response.json() )
-        .then(response => {
-            
-            if (response.status === "delete") isAdminPage("reload");
-            // delete == OK/Sucesso
-        })
-        .catch( error => {
-            console.error(error);
-            alert(msgError);
-        });
-
+            });
+        } else {
+            input_linkEstatisticas.focus();
+        } // else
     });
 }

@@ -8,7 +8,7 @@ $_FQDN = "https://{$_SERVER['HTTP_HOST']}";
 
 
 
-if ( isset($_GET["folder"]) && isset($_GET["url"]) ) {
+if ( isset($_GET["folder"]) && isset($_GET["url"]) && !empty($_GET["folder"]) && !empty($_GET["url"]) ){
     $urls = escapeshellcmd( $_GET["url"] );
     $folder = escapeshellcmd( $_GET["folder"] );
 
@@ -17,98 +17,119 @@ if ( isset($_GET["folder"]) && isset($_GET["url"]) ) {
         if (($pos = strpos($folder, "/")) !== FALSE) { // caso tenha uma sub-pasta
             $sub_folder = substr($folder, $pos+1);
             $folder = "view/css/$sub_folder";
-        } else { $folder = "view/css/"; } // caso não tenha sub-pasta, apenas 'media/css'
-    // } else if (strpos($folder, "fontawesome") !== FALSE){
-    //     if (($pos = strpos($folder, "/")) !== FALSE) {
-    //         $sub_folder = substr($folder, $pos+1);
-    //         $folder = "view/fontawesome/$sub_folder";
-    //     } else { $folder = "view/fontawesome/"; }
+        } else { $folder = "view/css/"; } // caso não tenha sub-pasta, apenas 'view/css'
+    } else if (strpos($folder, "fontawesome") !== FALSE){
+        if (($pos = strpos($folder, "/")) !== FALSE) {
+            $sub_folder = substr($folder, $pos+1);
+            $folder = "view/fonts/fontawesome/$sub_folder";
+        } else { $folder = "view/fonts/fontawesome/"; }
     } else if (strpos($folder, "scripts") !== FALSE){
         if (($pos = strpos($folder, "/")) !== FALSE) {
             $sub_folder = substr($folder, $pos+1);
             $folder = "view/js/$sub_folder";
         } else { $folder = "view/js/"; }
     } else {
-        header("Location: $_FQDN");
-        exit();
+        header("HTTP/1.1 404 Not Found ");
+        exit;
     }
 
-    // Se $folder não terminar com / então, adicione uma no final
+    // se $folder não terminar com / então, adicione uma no final
     if (endsWith($folder, "/") == false) { $folder .= "/"; }
-} else { header("Location: $_FQDN"); exit(); }
-
-if ( empty($_GET["url"]) || empty($_GET["folder"]) ) { // echo "URL is required";
-    header("Location: $_FQDN"); exit();
+} else { // se PASTA e URL não foram informadas reponde com status HTTP 400
+    header("HTTP/1.1 400 Bad Request");
+    exit;
 }
 
 // Protecao de download de arquivos
 if (strpos($folder, "..") !== false || strpos($urls, "..") !== false) {
-    header("Location: $_FQDN"); exit();
+    header("Location: $_FQDN"); exit;
 }
 
 
 
 if (endsWith($urls, "js") == true) { // JAVASCRIPT
-    header('Content-type: text/javascript');
-    $js = explode(",", $urls); // print_r(explode(",", $file)); // Array
+    header("Content-type: text/javascript");
 
-    if (is_array($js)) {
-        foreach ($js as $file) {
+    $files = explode(",", $urls); // print_r(explode(",", $file)); // Array
+    if (count($files) > 1) { // se houver mais de um elemento no Array
+        header("Cache-Control: must-revalidate");
 
-            $js_file = $folder . $file;
+        foreach ($files as $js) {
+
+            $js_file = $folder . $js;
             if (file_exists($js_file)) {
-
-                if ((strpos($js_file, ".min.js") !== FALSE)) { // SERA IGNORADO SE JA ESTIVER MINIFICADO > Copyright
+                if ((strpos($js_file, ".min.js") !== FALSE)) { // IGNORADO SE JA ESTIVER MINIFICADO > Copyright
                     echo file_get_contents("$js_file");
                 } else { echo minify_JS($js_file); }
 
             } else { // echo "Arquivo Não Encontrado <br><br> &emsp;&emsp;&emsp;" . $folder . $urls;
-                header("Location: $_FQDN"); exit();
+                header("HTTP/1.1 404 Not Found ");
+                exit;
             }
         } // foreach
-    } else { // is_array
-        $js = $folder . $urls;
+    } else { // count
+        $js = $folder . $files[0];
+
         if (file_exists($js)) {
+            if ((strpos($js, ".min.js") !== FALSE)) { // IGNORADO SE JA ESTIVER MINIFICADO > Copyright
+                FILE_MODIFIED($js); // se for um arquivo único, permitir salvar em CACHE = FILE_MODIFIED()
+                echo file_get_contents("$js");
+                exit;
+            } else {
 
-            if ((strpos($js, ".min.js") !== FALSE)) { // SERA IGNORADO SE JA ESTIVER MINIFICADO > Copyright
-                echo file_get_contents("$js"); exit();
-            } else { echo minify_JS($js); exit(); }
-
-        } else { header("Location: $_FQDN"); exit(); }
-    } // is_array
+                FILE_MODIFIED($js);
+                echo minify_JS($js);
+                exit;
+            }
+        } else {
+            header("HTTP/1.1 404 Not Found ");
+            exit;
+        }
+    } // count
 
 } else if (endsWith($urls, "css") == true) { // CSS
-    header('Content-type: text/css');
-    $css = explode(",", $urls);
+    header("Content-type: text/css");
 
-    if (is_array($css)) {
-        foreach ($css as $file) {
+    $files = explode(",", $urls);
+    if (count($files) > 1) { // se houver mais de um elemento no Array
+        header("Cache-Control: must-revalidate");
+        
+        foreach ($files as $css) {
 
-            $css_file = $folder . $file;
+            $css_file = $folder . $css;
             if (file_exists($css_file)) {
-            
-                if ((strpos($css_file, ".min.css") !== FALSE)) { // SERA IGNORADO SE JA ESTIVER MINIFICADO > Copyright
+                if ((strpos($css_file, ".min.css") !== FALSE)) { // IGNORADO SE JA ESTIVER MINIFICADO > Copyright
                     echo file_get_contents("$css_file");
                 } else { echo minify_CSS($css_file); }
 
-            } else { header("Location: $_FQDN"); exit(); }
+            } else {
+                header("HTTP/1.1 404 Not Found ");
+                exit;
+            }
         } // foreach
-    } else { // is_array
-        $css = $folder . $urls;
+    } else { // count
+        $css = $folder . $files[0];
         if (file_exists($css)) {
+            if ((strpos($css, ".min.css") !== FALSE)) { // IGNORADO SE JA ESTIVER MINIFICADO > Copyright
+                FILE_MODIFIED($css); // se for um arquivo único, permitir salvar em CACHE = FILE_MODIFIED()
+                echo file_get_contents("$css");
+                exit;
+            } else {
 
-            if ((strpos($css, ".min.css") !== FALSE)) { // SERA IGNORADO SE JA ESTIVER MINIFICADO > Copyright
-                echo file_get_contents("$css"); exit();
-            } else { echo minify_CSS($css); exit(); }
-
-        } else { header("Location: $_FQDN"); exit(); }
-    } // is_array
+                FILE_MODIFIED($css);
+                echo minify_CSS($css);
+                exit;
+            }
+        } else {
+            header("HTTP/1.1 404 Not Found ");
+            exit;
+        }
+    } // count
 } else {
     // echo "O nome dos arquivos deve terminar com <b>.JS</b> ou <b>.CSS</b> <br><br> &emsp;&emsp;&emsp;" . $folder . $urls;
-    header("Location: $_FQDN");
-    exit();
+    header("HTTP/1.1 404 Not Found ");
+    exit;
 }
-
 
 function endsWith($haystack, $needle) {
     $length = strlen($needle);
@@ -265,4 +286,19 @@ function minify_JS($input_File) {
             '$1'
         ),
     $input);
+}
+
+function FILE_MODIFIED($file) {
+    $flmtime = filemtime($file);
+    header('ETag: "' . md5($flmtime . $file) . '"');
+    header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $flmtime) . ' GMT'); // header('Last-Modified: ' . $flmtime);
+    header('Cache-Control: private,max-age=86400');
+
+    if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) || isset($_SERVER['HTTP_IF_NONE_MATCH'])) {
+        if ($_SERVER['HTTP_IF_MODIFIED_SINCE'] == $flmtime || str_replace('"', '', stripslashes($_SERVER['HTTP_IF_NONE_MATCH'])) == md5($flmtime . $file)) {
+            header('HTTP/1.1 304 Not Modified');
+            return TRUE;
+        }
+    }
+    return FALSE;
 }

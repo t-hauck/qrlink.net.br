@@ -1,0 +1,18 @@
+
+
+https://nomadphp.com/blog/64/creating-a-url-shortener-application-in-php-mysql
+
+
+
+
+
+// robots.txt
+User-agent: *
+Allow: /
+Allow: /*/*.css
+Allow: /*/*.js
+Disallow: *?*=*
+Disallow: *?*=*&*=*
+Disallow: *?*=*=*
+Disallow: /testes
+Disallow: /db

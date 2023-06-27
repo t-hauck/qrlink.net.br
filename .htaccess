@@ -3,7 +3,7 @@ DirectoryIndex rotas.php
 ErrorDocument 400 /?status=400
 ##ErrorDocument 401 /?status=404
 ##ErrorDocument 403 /?status=404
-ErrorDocument 404 /?status=200
+ErrorDocument 404 /?status=404
 ErrorDocument 405 /?status=405
 ErrorDocument 408 /?status=408
 ErrorDocument 429 /?status=429
@@ -19,11 +19,9 @@ RewriteRule ^code/?$ gz.php [L,QSA]
 ## Redirecionar tudo para 'rotas.php'
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ rotas.php [L,QSA]
+RewriteRule ^(.*)$ rotas.php [L]
 
 ## Bloquear acesso a dados específicos
 RewriteRule ^(.*/)?\.git+ - [R=404,L]
 RewriteRule ^(.*/)?\.env+ - [R=404,L]
-
-## outra opção de bloqueio SEM 'mod_rewrite'
-# RedirectMatch 404 ^(.*/)?\.git+
+RewriteRule ^(db|testes) - [R=404,L]

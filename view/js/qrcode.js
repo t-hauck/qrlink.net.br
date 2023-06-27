@@ -1,28 +1,59 @@
 ////
-// QRCODE
-//
-//// Criador de qrcode usando o Google Charts
-//function GerarQRCode(){
-//    var inputUsuario = document.querySelector('textarea').value;
-//    var GoogleChartAPI = 'https://chart.googleapis.com/chart?cht=qr&chs=500x500&chld=H&chl=';
-//    var conteudoQRCode = GoogleChartAPI + encodeURIComponent(inputUsuario);
-//    document.querySelector('#QRCodeImage').src = conteudoQRCode;
-//}
-if (!('BarcodeDetector' in window)) console.error("Navegador não compatível com leitura de QRCode/Código de Barras.");
+// CRIAÇÃO DE QRCODE
+function request_criarQR(text){
+    changeCursor_POST("wait");
+    let requestConf = {
+        method: "GET",
+        headers: {"Content-type": "application/x-www-form-urlencoded; charset=UTF-8"}
+    };
 
-var resultContainer = document.getElementById('qr-reader-results');
-var lastResult, countResults = 0;
-
-function onScanSuccess(decodedText, decodedResult) {
-    if (decodedText !== lastResult) {
-        ++countResults;
-        lastResult = decodedText;
-        // console.log(`Scan result ${decodedText}`, decodedResult);
-        alert(`Texto escaneado do QRCode: \n${decodedText} \n\nAnote este texto em algum lugar, ele não irá aparecer novamente.`)
-    
-    }
+    let QRCode_URL = `https://chart.apis.google.com/chart?chs=500x500&cht=qr&chl=${text}&choe=UTF-8&chld=H`;
+    fetch( QRCode_URL, requestConf )
+        .then(res => res.blob() )
+        .then(response => { // console.log(img);
+            var img = URL.createObjectURL(response);    
+            Swal.fire({
+                title: 'Código QR',
+                html: `<a href="${QRCode_URL}" target="_blank">${text}</a>`,
+                footer: 'Este código QR foi criado usando o Google Charts, foi tudo feito no seu navegador e nenhum dado salvo em nossos servidores.',
+                imageUrl: img,
+                imageAlt: text
+            });
+            changeCursor_POST("default");
+        })
+    .catch( error => {
+        changeCursor_POST("default");
+        console.error(error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Erro!',
+            html: `Ocorreu um erro ao gerar o Código QR. <br>Dados técnicos estão disponíveis abaixo: <br><br>${error}`,
+        });
+    });
 }
 
-var html5QrcodeScanner = new Html5QrcodeScanner(
-    "qr-reader", { fps: 10, qrbox: 250 });
-html5QrcodeScanner.render(onScanSuccess);
+////
+// CRIAÇÃO DE QRCODE | PÁGINA PRINCIPAL
+let submit_criarQRCode = document.getElementById("submit_criarQRCode");
+if (submit_criarQRCode) {
+    submit_criarQRCode.addEventListener('click', function (){
+        if (input_qr.value) request_criarQR(input_qr.value);
+        else input_qr.focus();
+    });
+}
+
+////
+// CRIAÇÃO DE QRCODE | PÁGINA DE ESTATISTICAS
+let interval_tableQRIcon = setInterval(() => {
+    const btn_tableQR = document.querySelectorAll(".qr_shortCode");
+    if (btn_tableQR) { // verifica se a classe existe no HTML: adicionada por JS via POST 
+        clearInterval(interval_tableQRIcon); // para a verificação
+        
+        btn_tableQR.forEach(btn => {
+            btn.addEventListener("click", (e) => {
+                let element = btn.getAttribute("short_code");
+                request_criarQR(element);
+            });
+        }); // forEach
+    }
+}, 1000);
