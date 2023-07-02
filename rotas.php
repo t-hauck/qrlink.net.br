@@ -63,6 +63,10 @@ if (!isset($_SESSION['submitToken'])) $_SESSION['submitToken'] = bin2hex(random_
 
 if ($method == "GET") {
 
+    if ( isset($_GET["status"]) && $_GET["status"] != "") { // ?status= é enviado pelo Apache com .htaccess
+        HTTP_HEADERS($_GET["status"]);
+    }
+
     if ( empty($URL_query[1]) == FALSE ) {
         if ( $URL_query[1] === "sobre" ) { // /sobre == página com conteúdo sobre o sistema
             require_once 'view/sobre.php';
@@ -88,10 +92,6 @@ if ($method == "GET") {
             //     $controller->redirectLink("GET", $URL_query[1], "");
             //     exit;
             // }
-
-            if ( isset($_GET["status"]) && $_GET['status'] != "") { /// ?status= é enviado pelo Apache com .htaccess
-                HTTP_HEADERS($_GET["status"]);   
-            }
 
             if ( count($URL_query) >= 3) {
                 HTTP_HEADERS(404);
@@ -153,8 +153,6 @@ if ($method == "GET") {
             } else { HTTP_HEADERS(405); }
         } else { HTTP_HEADERS(405); } // $URL_query[1]
         
-
-
     } else { HTTP_HEADERS(405); } // token CSRF
 } else { HTTP_HEADERS(405); }     // method POST
 // print_r(error_get_last());

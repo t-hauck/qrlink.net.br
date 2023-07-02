@@ -22,10 +22,6 @@
   width: 220px;
 }
 
-.linha_footer {
-  border-top: 1px solid white;
-}
-
 /* CSS da página de Estatísticas */
 .fadeIn {
   opacity: 1;
@@ -36,8 +32,6 @@
   opacity: 0;
   transition: 1s;
 }
-
-footer { bottom: 0; }
 
 .table tbody tr { font-weight: normal; }
 .table tbody tr a { color: #363636; }

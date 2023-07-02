@@ -52,9 +52,9 @@ $FQDN = $protocol . $domainName;
 
         <div class="column is-12 is-12-desktop mx-auto">
             <p class="mb-1">
-              Apenas os links encurtados com o seu navegador web atual estão listados aqui. As informações abaixo são armazenadas no <abbr title="<?= $sobre_LocalStorage ?>" class="info_Touch">LocalStorage</abbr>, se apagar os seus dados no <abbr title="<?= $sobre_LocalStorage ?>" class="info_Touch">LocalStorage</abbr>, poderá perder essa informação.
+              Apenas os links encurtados com o seu navegador web atual serão listados aqui. As informações abaixo são armazenadas no <abbr title="<?= $sobre_LocalStorage ?>" class="info_Touch">LocalStorage</abbr>, se apagar os seus dados no <abbr title="<?= $sobre_LocalStorage ?>" class="info_Touch">LocalStorage</abbr>, poderá perder essa informação.
             </p>
-            <p class="mb-2">Não serão listados links que já não estão disponíveis, links que não tem nenhum acesso a mais de <u>1 Mês</u> são apagados automaticamente do sistema.</span>
+            <p class="mb-2">Não serão listados links que já não estão disponíveis, links que não tem nenhum acesso a mais de <u>3 Meses</u> são apagados automaticamente do sistema.</span>
             </p>
 
             <div class="mb-5">
@@ -67,7 +67,7 @@ $FQDN = $protocol . $domainName;
                   <th><abbr title="Ordem do link na tabela">N.</abbr></th>
                   <th><abbr title="URL completa que foi encurtada">Link Original</abbr></th>
                   <th></th> <!-- SENHA/Icones = nome da coluna em branco -->
-                  <th><abbr title="Código alfanumérico pequeno">Link Curto</abbr></th>
+                  <th><abbr title="Código alfanumérico pequeno">Código</abbr></th>
                   <th><abbr title="Número total de acessos">Acessos</abbr></th>
                   <th><abbr title="Data e horário do último acesso">Último Acesso</abbr></th>
                   <th><abbr title="Número total de tentativas de acessos mal sucedidas a links curtos protegidos por senha">Tentativas</abbr></th>

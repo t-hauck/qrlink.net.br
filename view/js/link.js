@@ -86,19 +86,12 @@ if (submit_criarLink) {
             };
             // fetch("/link/save", requestConf) // fetch( window.location.host,
             fetch("/save", requestConf) // fetch( window.location.host,
-                .then((res) => res.json())
+                .then(handleFetchResponse())
                 .then((res) => { // console.log(res[0]);
         
-                    if (res.status && res.message){ // aqui não é verificado se o "status" recebido é igual a "error"
-                        Swal.fire({
-                            icon: "error",
-                            title: "Erro!",
-                            html: res.message,
-                            showConfirmButton: true,
-                            timer: 10000, // 10 segundos
-                        });
-                    } else {
-                        localStorage_link_save(res.short_code);
+                    handleFetchResponse();
+
+                    localStorage_link_save(res.short_code);
 
                         // res[0].forEach(function(item){
                         let link_curto = window.location.origin + "/" + res.short_code;
@@ -128,17 +121,12 @@ if (submit_criarLink) {
                             }
                         } // else
                         // }); // forEach
-                }
+
                 changeCursor_POST("default");
             })
             .catch( error => {
                 changeCursor_POST("default");
-                console.error(error); // Erro ao cadastrar Link
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Erro!',
-                    html: `Ocorreu um erro ao encurtar o seu link. <br>Dados técnicos estão disponíveis abaixo: <br><br>${error}`,
-                });
+                handleFetchResponse("generic-error", `Ocorreu um erro ao encurtar o seu link.`);
             });
         } else {
             input_link.focus();
@@ -179,28 +167,21 @@ if (submit_checarSenha) {
             };
             
             fetch(`/checkPassword${window.location.pathname}`, requestConf)
-                .then((res) => res.json())
+                .then(handleFetchResponse())
                 .then((res) => { // console.log(res[0]);
 
-                    if (res.status && res.message){ // aqui não é verificado se o "status" recebido é igual a "error"
-                        Toast.fire({
-                            icon: 'error',
-                            title: res.message
-                        });
-                    } else { // o JAVASCRIPT redireciona o usuario
-                        window.location.href = res.original_url;
-                    }
+                    handleFetchResponse();
+
+                    // o JAVASCRIPT redireciona o usuario
+                    window.location.href = res.original_url;
+                    
                     changeCursor_POST("default");
             })
             .catch( error => {
                 changeCursor_POST("default");
-                console.error(error); // Erro ao verificar senha
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Erro!',
-                    html: `Ocorreu um erro ao verificar a senha. <br>Dados técnicos estão disponíveis abaixo: <br><br>${error}`,
-                });
+                handleFetchResponse("generic-error", `Ocorreu um erro ao verificar a senha.`);
             });
+
         } else {
             input_link_senha.focus();
         }
@@ -238,99 +219,87 @@ if (submit_obterEstatisticas) {
             };
             
             fetch("/getStats", requestConf)
-            .then((res) => res.json())
+            .then(handleFetchResponse()) // .then((res) => res.json())
             .then((res) => {
                 
-                if (res.status && res.message){ // aqui não é verificado se o "status" recebido é igual a "error"
-                    Swal.fire({
-                        icon: "error",
-                        title: "Erro!",
-                        html: res.message
-                    });
-                }
-                else { // EM CASO DE SUCESSO - O LINK EXISTE NO BANCO DE DADOS
-                    res = res[0];
-                    let link_curto = window.location.origin + "/" + res.short_code;
+                handleFetchResponse();
+                
+                // continua.. EM CASO DE SUCESSO, O LINK EXISTE NO BANCO DE DADOS
+                res = res[0];
+                let link_curto = window.location.origin + "/" + res.short_code;
 
-                    if (res.short_code_password === null) {
-                            var hasPassword = false;
-                    }else if (res.short_code_password === "-") {
-                        var hasPassword = true;
-                    }else {
+                if (res.short_code_password === null) {
                         var hasPassword = false;
-                    }
-                    
+                }else if (res.short_code_password === "-") {
+                    var hasPassword = true;
+                }else {
+                    var hasPassword = false;
+                }
+                
 
-                    input_statsResult.classList.remove("fadeOut");
-                    input_statsResult.classList.add("fadeIn");
+                input_statsResult.classList.remove("fadeOut");
+                input_statsResult.classList.add("fadeIn");
 
-                    input_statsResult.innerHTML = `
-                        <article class="message is-warning">
-                            <div class="message-header">
-                                <p>
-                                    <a style="text-decoration:none;" href="${link_curto}" target="_blank">${link_curto}</a>
-                                </p>
-                                <button class="delete" aria-label="delete"></button>
-                            </div>
+                input_statsResult.innerHTML = `
+                    <article class="message is-warning">
+                        <div class="message-header">
+                            <p>
+                                <a style="text-decoration:none;" href="${link_curto}" target="_blank">${link_curto}</a>
+                            </p>
+                            <button class="delete" aria-label="delete"></button>
+                        </div>
 
-                            <div class="message-body">
-                                Link Original: &emsp;             <a style="text-decoration:none;" href="${res.url}" target="_blank">${res.url}</a>
-                                <br>
-                                Código Curto: &nbsp;&nbsp;&nbsp;  <a href="${link_curto}" target="_blank">${res.short_code}</a>
-                                <br>
-                                Número de Acessos: &nbsp; <b>${res.access}</b>
-                                <br>
-                                Último Acesso: &nbsp; ${ // NULL = sem acessos                      // - = link do próprio sistema
-                                res.last_access === null ? "-" : (res.last_access == "-" ? res.last_access : convertDateTime(res.last_access) ) }
+                        <div class="message-body">
+                            Link Original: &emsp;             <a style="text-decoration:none;" href="${res.url}" target="_blank">${res.url}</a>
+                            <br>
+                            Código Curto: &nbsp;&nbsp;&nbsp;  <a href="${link_curto}" target="_blank">${res.short_code}</a>
+                            <br>
+                            Número de Acessos: &nbsp; <b>${res.access}</b>
+                            <br>
+                            Último Acesso: &nbsp; ${ // NULL = sem acessos                      // - = link do próprio sistema
+                            res.last_access === null ? "-" : (res.last_access == "-" ? res.last_access : convertDateTime(res.last_access) ) }
 
-                                ${  // Número total de tentativas de acesso a links protegidos por senha
-                                    hasPassword === false ? "" : (hasPassword === true ? (res.password_access_attempts === null ? "<br> Número de Tentativas: &nbsp; 0" : "<br> Número de Tentativas: &nbsp;" + res.password_access_attempts) : console.error(res.password_access_attempts) ) }
+                            ${  // Número total de tentativas de acesso a links protegidos por senha
+                                hasPassword === false ? "" : (hasPassword === true ? (res.password_access_attempts === null ? "<br> Número de Tentativas: &nbsp; 0" : "<br> Número de Tentativas: &nbsp;" + res.password_access_attempts) : console.error(res.password_access_attempts) ) }
 
-                                ${  // Data e Horário do último acesso a links protegidos por senha
-                                    hasPassword === false ? "" : (hasPassword === true ? (res.password_last_access_attempt === null ? "<br> Última Tentativa: &nbsp; -" : "<br> Última Tentativa: &nbsp;" + convertDateTime(res.password_last_access_attempt)) : console.error(res.password_last_access_attempt) ) }
+                            ${  // Data e Horário do último acesso a links protegidos por senha
+                                hasPassword === false ? "" : (hasPassword === true ? (res.password_last_access_attempt === null ? "<br> Última Tentativa: &nbsp; -" : "<br> Última Tentativa: &nbsp;" + convertDateTime(res.password_last_access_attempt)) : console.error(res.password_last_access_attempt) ) }
 
-                                ${  // Indicador de link protegido por senha
-                                    hasPassword === false ? "" : (hasPassword === true ? "<br><br><span class='icon-text'><span class='icon'><figure class='image'><img class='image' src='/view/img/icons8-password.svg' alt='' title='É necessária uma senha para acessar o link encurtado'></figure></span><span>Link Protegido</span></span>" : console.error(res.short_code_password) )
-                                }
-                            </div>
-                        </article>
-                    `;
+                            ${  // Indicador de link protegido por senha
+                                hasPassword === false ? "" : (hasPassword === true ? "<br><br><span class='icon-text'><span class='icon'><figure class='image'><img class='image' src='/view/img/icons8-password.svg' alt='' title='É necessária uma senha para acessar o link encurtado'></figure></span><span>Link Protegido</span></span>" : console.error(res.short_code_password) )
+                            }
+                        </div>
+                    </article>
+                `;
 
 /*
 <!--
-                                <br><br>
-                                <div class="field has-addons mt-1" style="justify-content: flex-end;">
-                                    <div class="control">
-                                        <button class="button is-small">Atualizar</button>
-                                    </div>
+                            <br><br>
+                            <div class="field has-addons mt-1" style="justify-content: flex-end;">
+                                <div class="control">
+                                    <button class="button is-small">Atualizar</button>
                                 </div>
+                            </div>
 -->
 */
 
-                    /* Comentário sobre o Último Acesso recebido do banco de dados
+                /* Comentário sobre o Último Acesso recebido do banco de dados
 
-                    //  Verifica se é NULL, se for, mostra ZEROS na tela e se não for converte o horário para o fuso do usuário e exibe na tela
-                        Último Acesso: &nbsp; ${ res.last_access === null ? "0000-00-00 00:00:00" : convertDateTime(res.last_access) }
+                //  Verifica se é NULL, se for, mostra ZEROS na tela e se não for converte o horário para o fuso do usuário e exibe na tela
+                    Último Acesso: &nbsp; ${ res.last_access === null ? "0000-00-00 00:00:00" : convertDateTime(res.last_access) }
 
-                    //  Verifica se é NULL, se for, mostra ZEROS na tela e se não for verifica se é IGUAL a zeros e caso não seja converte o horário para o fuso do usuário e exibe na tela
-                        Último Acesso: &nbsp; ${ res.last_access === null ? "0000-00-00 00:00:00" : (res.last_access == "0000-00-00 00:00:00" ? res.last_access : convertDateTime(res.last_access) ) }
-                    */
+                //  Verifica se é NULL, se for, mostra ZEROS na tela e se não for verifica se é IGUAL a zeros e caso não seja converte o horário para o fuso do usuário e exibe na tela
+                    Último Acesso: &nbsp; ${ res.last_access === null ? "0000-00-00 00:00:00" : (res.last_access == "0000-00-00 00:00:00" ? res.last_access : convertDateTime(res.last_access) ) }
+                */
 
-                    // isVisible.js
-                    detectDeleteAction();
-                }
+                // isVisible.js
+                detectDeleteAction();
 
                 changeCursor_POST("default");
-            })  
+            })
             .catch( error => {
                 changeCursor_POST("default");
-                console.error(error); // Erro ao cadastrar Link
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Erro!',
-                    html: `Falha ao buscar as informações sobre o link ${input}. <br>Dados técnicos estão disponíveis abaixo: <br><br>${error}`
-                });
-
+                handleFetchResponse("generic-error", `Falha ao buscar as informações sobre o link ${input}`); // , error
             });
         } else {
             input_linkEstatisticas.focus();

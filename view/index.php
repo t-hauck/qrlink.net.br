@@ -28,7 +28,7 @@ $num_linksSalvosHoje = $controller->contarSalvos_hoje();
                 <div id="qr-reader"></div>
             </div>
 
-            <div class="column is-8 is-8-desktop mx-auto" id="container_criarQRCode" style="display:none;"">
+            <div class="column is-8 is-8-desktop mx-auto" id="container_criarQRCode" style="display:none;">
                 <div class="field has-addons has-addons-centered">
                     <div class="control" style="width:100%;">
                         <input class="input is-medium" id="input_qrOriginal" type="url" placeholder="Insira o texto aqui" autocomplete="off" autofocus required>
@@ -37,11 +37,8 @@ $num_linksSalvosHoje = $controller->contarSalvos_hoje();
                         <button class="button is-info is-medium is-rounded" id="submit_criarQRCode" alt="Criar um QRCode com um texto">Criar QRCode</button>
                     </div>
                 </div>
-
-                <!-- <div class="field has-addons mt-1 mr-2" style="justify-content: flex-end;">
-                    <div class="control"><button class="button is-info is-small is-rounded" id="submit_criarQRCode">Criar QRCode</button></div>
-                </div> -->
-            </div>
+                <!-- <div class="field has-addons mt-1 mr-2" style="justify-content: flex-end;"><div class="control"><button class="button is-info is-small is-rounded" id="submit_criarQRCode">Criar QRCode</button></div></div> -->
+            </div> <!-- container_criarQRCode -->
 
             <div class="column is-8 is-8-desktop mx-auto" id="container_criarLink">
                 <div class="field has-addons has-addons-centered">
@@ -52,7 +49,6 @@ $num_linksSalvosHoje = $controller->contarSalvos_hoje();
                         <button class="button is-medium is-rounded is-info" id="submit_criarLink" alt="Encurtar um link grande">Encurtar Link</button>
                     </div>
                 </div>
-
                 <div class="field is-horizontal">
                     <div class="field-label is-small">
                         <label class="label">Adicione uma senha para o link curto</label>
@@ -67,7 +63,9 @@ $num_linksSalvosHoje = $controller->contarSalvos_hoje();
                     </div>
                 </div>
 
-            </div>
+                <div class="column is-7 is-7-desktop mx-auto" id="msgLocalData" style="display:none;"></div>
+
+            </div> <!-- container_criarLink -->
         </div> <!-- columns -->
       
         <div class="columns is-multiline">
@@ -229,10 +227,10 @@ $num_linksSalvosHoje = $controller->contarSalvos_hoje();
             <div class="mr-auto mb-2"></div>
             <div>
                 <ul class="is-flex is-flex-wrap-wrap is-align-items-center is-justify-content-center">
-                    <li class="mr-4"><a class="button is-white paraEstatisticas" href="#">Meus Links</a></li>
-                    <li class="mr-4"><a class="button is-white criarLink" href="#">Encurtar Link</a></li>
-                    <li class="mr-4"><a class="button is-white criarQRCode" href="#">Criar QRCode</a></li>
-                    <li class="mr-4"><a class="button is-white qrScan" href="#">Escanear QRCode</a></li>
+                    <li class="mr-4"><a class="button is-white paraEstatisticas">Meus Links</a></li>
+                    <li class="mr-4"><a class="button is-white criarLink">Encurtar Link</a></li>
+                    <li class="mr-4"><a class="button is-white criarQRCode">Criar QRCode</a></li>
+                    <li class="mr-4"><a class="button is-white qrScan">Escanear QRCode</a></li>
                 </ul>
             </div>
         </div>

@@ -69,14 +69,17 @@ document.getElementById("apagar_link_list").addEventListener("click", (e) => {
         }
     };
     fetch("/delete", requestConf )
-        .then(response => response.json() )
+        .then(handleFetchResponse())
         .then(response => {
-            if (response.status != "error") { checkCurrentPage("/admin", "reload") }
+
+            handleFetchResponse();
+            checkCurrentPage("/admin", "reload");
+
+            // if (response.status != "error") { checkCurrentPage("/admin", "reload") }
         })
     .catch( error => {
         changeCursor_POST("default");
-        console.error(error);
-        alert("Erro ao Apagar os links selecionados do banco de dados");
+        handleFetchResponse("generic-error", `Erro ao Apagar os links selecionados do banco de dados`);
     });
 });
 

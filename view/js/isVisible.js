@@ -5,6 +5,7 @@
 let token = document.getElementById("formToken");
 let links_exportBtn = document.getElementById('export');
 
+////
 // Funções utilizadas pela maioria dos arquivos de script
 function changeCursor_POST(type){
     if (type == "wait") {
@@ -25,7 +26,6 @@ function checkCurrentPage(page, action){ // window.location.pathname.indexOf(pag
             return true;
     } else  return false;
 }
-
 
 //// NAVEGAÇÃO PELO MENU DO BULMA-CSS EM TELAS PEQUENAS
 // https://bulma.io/documentation/components/navbar/#navbar-menu

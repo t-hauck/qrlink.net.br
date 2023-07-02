@@ -23,12 +23,7 @@ function request_criarQR(text){
         })
     .catch( error => {
         changeCursor_POST("default");
-        console.error(error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Erro!',
-            html: `Ocorreu um erro ao gerar o Código QR. <br>Dados técnicos estão disponíveis abaixo: <br><br>${error}`,
-        });
+        handleFetchResponse("generic-error", `Ocorreu um erro ao gerar o Código QR.`);
     });
 }
 

@@ -174,7 +174,7 @@ class LinkController {
                         "last_access" => "-", // "0000-00-00 00:00:00",
                         "short_code_password" => $item["short_code_password"] // NULL
                     ];
-                    
+
                     header("Content-type: application/json");
                     echo json_encode([ $systemArray ]);
                     exit();
@@ -237,34 +237,42 @@ class LinkController {
         $stmt->execute();
         $arr = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        foreach ($arr as $item) { // Tratamento para exibição da senha para o usuário, não há tratamento no PHP para "último acesso"
-            if ($item["short_code_password"] == NULL) { // LINK NÃO TEM SENHA
-                $passwdArray = [
-                    "url" => $item["original_url"],
-                    "short_code" => $item["short_code"],
-                    "access" => $item["access"],
-                    "last_access" => $item["last_access"],
-                    "short_code_password" => $item["short_code_password"], // NULL
-                ];
-            } else { // FOI CADASTRADA UMA SENHA DE ACESSO PARA O LINK
-                $passwdArray = [
-                    "url" => $item["original_url"],
-                    "short_code" => $item["short_code"],
-                    "access" => $item["access"],
-                    "last_access" => $item["last_access"],
-                    "short_code_password" => "-", // não enviar o HASH da senha
-                    "password_access_attempts" => $item["access_attempts"],         // NULL
-                    "password_last_access_attempt" => $item["last_access_attempt"], // NULL
-                ];
-            }
+        foreach ($slug as $code) { // slug == dados do usuário
+            $found = false;
 
-            if (!$arr){ // se um link não for encontrado
-                array_push($codeData, array("short_code" => $slug, "status" => "deleted") );
-            } else {    // se um link existir no servidor, enviar informações sobre ele
-                array_push($codeData, $passwdArray );
+            foreach ($arr as $item) { // arr == dados do servidor
+                if ($item["short_code"] === $code) {
+                    $found = true;
+
+                    // Tratamento para exibição da senha para o usuário, não há tratamento no PHP para "último acesso"
+                    if ($item["short_code_password"] == NULL) { // LINK NÃO TEM SENHA
+                        $passwdArray = [
+                            "url" => $item["original_url"],
+                            "short_code" => $item["short_code"],
+                            "access" => $item["access"],
+                            "last_access" => $item["last_access"],
+                            "short_code_password" => $item["short_code_password"], // NULL
+                        ];
+                    } else { // FOI CADASTRADA UMA SENHA DE ACESSO PARA O LINK
+                        $passwdArray = [
+                            "url" => $item["original_url"],
+                            "short_code" => $item["short_code"],
+                            "access" => $item["access"],
+                            "last_access" => $item["last_access"],
+                            "short_code_password" => "-", // não enviar o HASH da senha
+                            "password_access_attempts" => $item["access_attempts"],         // NULL
+                            "password_last_access_attempt" => $item["last_access_attempt"], // NULL
+                        ];
+                    }
+                    // se um link existir no servidor, enviar informações sobre ele
+                    array_push($codeData, $passwdArray);
+                    break;
+                }
+            } // foreach
+            if (!$found) { // se um link não for encontrado
+                array_push($codeData, array("short_code" => $code, "status" => "deleted"));
             }
         } // foreach
-
         header("Content-type: application/json");
         echo json_encode([ $codeData ]);
         exit();
@@ -309,17 +317,17 @@ class LinkController {
                     exit;
                 } else { // ERRO ao atualizar os acessos no banco
                     header("Content-type: application/json");
-                    echo json_encode([ "status" => "error", "message" => "Falha no Banco de Dados" ]) ;
+                    echo json_encode([ "status" => "error-redirect", "message" => "Falha no Banco de Dados" ]) ;
                     exit;
                 }
             } else { // SENHA INCORRETA
                 if ( $this->redirect_updateDB_PassFailed($short_code) ) {
                     header("Content-type: application/json");
-                    echo json_encode([ "status" => "error", "message" => "Senha Inválida" ]) ;
+                    echo json_encode([ "status" => "error-redirect", "message" => "Senha Inválida" ]) ;
                     exit;
                 } else { // ERRO ao atualizar os acessos no banco
                     header("Content-type: application/json");
-                    echo json_encode([ "status" => "error", "message" => "Falha no Banco de Dados" ]) ;
+                    echo json_encode([ "status" => "error-redirect", "message" => "Falha no Banco de Dados" ]) ;
                     exit;
                 }
             }
@@ -404,8 +412,7 @@ class LinkController {
         } else {
             if ($num_rows == 0) return " Nenhum Link Encurtado Salvo no Sistema";
             if ($num_rows == 1) return " 1 URL Encurtada";
-            if ($num_rows >= 2) return "<span class='is-size-1 has-text-weight-bold'>$num_rows</span><br> <span class='is-size-6'>Total de Links</span>";           
-            // if ($num_rows >= 2) return " " . $num_rows . " Links Encurtados pelo Sistema";
+            if ($num_rows >= 2) return "<span class='is-size-1 has-text-weight-bold'>$num_rows</span><br> <span class='is-size-6'>Total de Links</span>";
         }        
     } // contarSalvos
 

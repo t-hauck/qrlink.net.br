@@ -52,7 +52,7 @@ $DB_name = $controller->obterNomeBanco();
                             <br> Esta página possui um campo de texto, utilize-o para buscar informações de um link que não aparece na tabela.
                         </p>
                         <article class="message is-danger">
-                            <div class="message-body">Todos os links encurtados serão apagados automaticamente do banco de dados após <b>3 Meses</b> sem nenhum acesso</div>
+                            <div class="message-body">Todos os links encurtados são apagados automaticamente do banco de dados após <b>3 Meses</b> sem nenhum acesso</div>
                         </article>
                     </div>
 
@@ -92,6 +92,27 @@ $DB_name = $controller->obterNomeBanco();
 </section>
 
 
+
+<footer class="section">
+    <div class="container">
+        <div class="pb-5 is-flex is-flex-wrap-wrap is-justify-content-between is-align-items-center">
+            <div id="msgLocalData" style="display:none;"></div>
+            <div class="mr-auto mb-2"></div>
+            
+        </div>
+        <div class="pt-5 linha_footer"></div>
+    </div>
+    <div class="container">
+        <div class="is-flex-tablet is-justify-content-between is-align-items-center">
+            <p>&copy; <?= date("Y"); ?> QR-Link</p>
+        </div>
+    </div>
+</footer>
+
+
+
+<input id="formToken" value="<?= $_SESSION["submitToken"] ?>" type="hidden">
+<?php // validado pelo rotas.php para Segurança, apenas o próprio site pode executar um POST ?>
 
 <?= returnJS(); ?>
 
