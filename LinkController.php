@@ -9,6 +9,8 @@
             Usado para identificar para a página de Estatísticas um link que foi apagado do banco de dados
         [4] status => error
             Usado para identificar erro em alguma operação, verifique por "error" ou qualquer coisa diferente do esperado
+        [5] status => error-redirect
+            Usado para identificar erro especificamente na função "redirectLink"
 */
 
 
