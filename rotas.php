@@ -118,7 +118,7 @@ if ($method == "GET") {
 } else if ($method == "POST") {
     $POST_Json = json_decode(file_get_contents("php://input"), true); // Requisição em JSON
     $headers = getallheaders();         // Headers HTTP da requisição
-    $tk_CSRF = $headers["CSRF-Token"];
+    $tk_CSRF = $headers["Csrf-Token"];
 
     // Valida o token CSRF presente na requisição
     if ( isset($tk_CSRF) && hash_equals($tk_CSRF, $_SESSION['submitToken']) ){
