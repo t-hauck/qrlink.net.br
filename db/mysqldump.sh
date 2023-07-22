@@ -51,8 +51,16 @@ fi
 backup_single_database() {
   local DATABASE="$1"
   local FILENAME="$BACKUP_DIR/$DATABASE-$(date +%Y%m%d%H%M%S).sql"
-  mysqldump -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASS" "$DATABASE" > "$FILENAME"
-  echo "Backup do banco de dados $DATABASE realizado com sucesso em $FILENAME"
+
+  db_exists=$(mysql -u "$DB_USER" -p"$DB_PASS" -h "$DB_HOST" -e "SHOW DATABASES LIKE '$DATABASE'" | grep $DATABASE)
+
+  if [[ -z "$db_exists" ]]; then
+    echo "Operação cancelada. O banco de dados '$DATABASE' não existe."
+    exit 1
+  else 
+    mysqldump -h "$DB_HOST" -u "$DB_USER" -p"$DB_PASS" "$DATABASE" > "$FILENAME"
+    echo "Backup do banco de dados $DATABASE realizado com sucesso em $FILENAME"
+  fi
 }
 
 # Função para restaurar um banco de dados completo a partir de um arquivo .SQL
@@ -63,20 +71,18 @@ restore_database() {
     # Extrai o nome do banco de dados do arquivo de mysqldump
     DB_NAME_dump=$(grep -oP --color=never "(?<=Database: )\w+" "$1")
     
-    # Verifica se o banco de dados existe
     db_exists=$(mysql -u "$DB_USER" -p"$DB_PASS" -h "$DB_HOST" -e "SHOW DATABASES LIKE '$DB_NAME_dump'" | grep "$DB_NAME_dump")
-    
+
     if [ -z "$db_exists" ]; then
       echo -e "\n- O Banco de Dados '$DB_NAME_dump' Não Existe"
       read -p "Deseja criar o banco de dados '$DB_NAME_dump'? (s/n): " choice
       
-      if [ "$choice" == "s" ] || [ "$choice" == "S" ]; then
-        # Cria o banco de dados
+      if [ "$choice" == "s" ] || [ "$choice" == "S" ]; then # Cria o banco de dados
         mysql -u "$DB_USER" -p"$DB_PASS" -h "$DB_HOST" -e "CREATE DATABASE $DB_NAME_dump"
         echo -e "\nBanco de Dados '$DB_NAME_dump' Criado com Sucesso"
       else
         echo "Operação cancelada. O banco de dados $DB_NAME_dump não foi restaurado."
-        return
+        exit 1
       fi
     fi
     
