@@ -21,11 +21,14 @@ require_once "conectar_SQL.php";
 require_once "view/info.php";
 
 class LinkController {
-    private $conexao;
     private $URL;
+    private $conexao;
+    private $system_ShortCode;
+
     public function __construct() {
-        $this->conexao = Conectar::sql();
         $this->URL = check_URLPath();
+        $this->conexao = Conectar::sql();
+        $this->system_ShortCode = $this->get_SystemShortCode();
     }
 
 
@@ -136,12 +139,9 @@ class LinkController {
             return $arr[0]["short_code"];
         } else {
             if ($this->save_new_shortURL($FQDN, "")) {
-                
                 // Executar novamente esta mesma função para rodar o SELECT no banco
-                return $this->get_SystemShortCode();
-            } else {
-                return FALSE;
-            }
+                     return $this->get_SystemShortCode();
+            } else { return FALSE; }
         }
     }
 
@@ -154,7 +154,6 @@ class LinkController {
             else if ($URL_query[1]) $link_code = $URL_query[1]; // qrlink.net.br/b4b9df
         }
 
-        $systemCode = $this->get_SystemShortCode();
         $num_rows   = $this->conexao->query("SELECT COUNT(*) FROM url_shorten WHERE short_code = '$link_code'")->fetchColumn();
 
         if ($num_rows) {
@@ -167,7 +166,7 @@ class LinkController {
 
             $arr = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            if ($link_code == $systemCode) { // retorna dados personalizados caso o código seja o do próprio sistema
+            if ($link_code == $this->system_ShortCode) { // retorna dados personalizados caso o código seja o do próprio sistema
                 foreach ($arr as $item) { ///// sistema = SEM SENHA
                     $systemArray = [
                         "url" => $item["original_url"],
@@ -211,20 +210,16 @@ class LinkController {
             }
         } else { // return FALSE;
             header("Content-type: application/json");
-            echo json_encode([ "status" => "error", "message" => "Não foram encontrados dados sobre o código <span style='text-decoration:underline;'>$link_code</span> <br><br>Verifique se este é um código curto válido. Insira no campo de texto o código curto que foi gerado para o seu link quando foi encurtado, ou o endereço completo para o acesso. Exemplo: $systemCode" ]) ;
+            echo json_encode([ "status" => "error", "message" => "Não foram encontrados dados sobre o código <span style='text-decoration:underline;'>$link_code</span> <br><br>Verifique se este é um link curto válido. Insira no campo de texto o código curto que foi gerado para o seu link quando foi encurtado, ou o endereço completo para o acesso. Exemplo: $this->system_ShortCode" ]) ;
             exit();
         }
     }
     
     
     public function get_userStats($slug) {
-        /* se o short_code armazenado no localStorage é igual ao do sistema NÃO enviar dados sobre o link do sistema
-        $systemCode = $this->get_SystemShortCode();
-        $removeKey = array_search($systemCode, $link_code);
-        if($removeKey !== false){ // remove item do array
-            unset($link_code[$removeKey]);
-        }- manter comentado => o código acima se tornou desnecessário 
-        -- depois da criação de uma validação para impedir que seja salvo um link com o endereço do sistema */
+        // $removeKey = array_search($this->system_ShortCode, $slug);
+        // if($removeKey !== false){ unset($slug[$removeKey]); }
+
         $codeData = array();
         $placeholders = implode(',', array_fill(0, count($slug), '?'));    
         $sql = "SELECT * FROM url_shorten WHERE short_code IN ($placeholders) LIMIT 200";
@@ -246,32 +241,45 @@ class LinkController {
                 if ($item["short_code"] === $code) {
                     $found = true;
 
-                    // Tratamento para exibição da senha para o usuário, não há tratamento no PHP para "último acesso"
-                    if ($item["short_code_password"] == NULL) { // LINK NÃO TEM SENHA
-                        $passwdArray = [
-                            "url" => $item["original_url"],
-                            "short_code" => $item["short_code"],
-                            "access" => $item["access"],
-                            "last_access" => $item["last_access"],
-                            "short_code_password" => $item["short_code_password"], // NULL
-                        ];
-                    } else { // FOI CADASTRADA UMA SENHA DE ACESSO PARA O LINK
-                        $passwdArray = [
-                            "url" => $item["original_url"],
-                            "short_code" => $item["short_code"],
-                            "access" => $item["access"],
-                            "last_access" => $item["last_access"],
-                            "short_code_password" => "-", // não enviar o HASH da senha
-                            "password_access_attempts" => $item["access_attempts"],         // NULL
-                            "password_last_access_attempt" => $item["last_access_attempt"], // NULL
-                        ];
-                    }
-                    // se um link existir no servidor, enviar informações sobre ele
-                    array_push($codeData, $passwdArray);
+                    // se o short_code armazenado no LocalStorage é igual ao do sistema NÃO enviar dados sobre seu link curto
+                    if ($item["short_code"] == $this->system_ShortCode){ // instrução para remover código do LocalStorage
+                        array_push($codeData, array("short_code" => $code, "status" => "deleted"));
+                    } else{
+
+                        // Tratamento para exibição da senha para o usuário, não há tratamento no PHP para "último acesso"
+                        if ($item["short_code_password"] == NULL) { // LINK NÃO TEM SENHA
+                            $passwdArray = [
+                                "url" => $item["original_url"],
+                                "short_code" => $item["short_code"],
+                                "access" => $item["access"],
+                                "last_access" => $item["last_access"],
+                                "short_code_password" => $item["short_code_password"], // NULL
+                            ];
+                        } else { // FOI CADASTRADA UMA SENHA DE ACESSO PARA O LINK
+                            if ($item["access_attempts"] == NULL) {
+                                    $value_PasswordAccessAttempts = "-";
+                            }else { $value_PasswordAccessAttempts = $item["access_attempts"]; }
+                            if ($item["last_access_attempt"] == NULL) {
+                                    $value_PasswordLastAccessAttempt = "-";
+                            }else { $value_PasswordLastAccessAttempt = $item["last_access_attempt"]; }
+
+                            $passwdArray = [
+                                "url" => $item["original_url"],
+                                "short_code" => $item["short_code"],
+                                "access" => $item["access"],
+                                "last_access" => $item["last_access"],
+                                "short_code_password" => "-", // não enviar o HASH da senha
+                                "password_access_attempts" => $value_PasswordAccessAttempts,        // default = NULL
+                                "password_last_access_attempt" => $value_PasswordLastAccessAttempt, // default = NULL
+                            ];
+                        }
+                        array_push($codeData, $passwdArray);
+                    } // else
+
                     break;
                 }
             } // foreach
-            if (!$found) { // se um link não for encontrado
+            if (!$found) { // se um link não for encontrado, NÃO enviar informações sobre ele
                 array_push($codeData, array("short_code" => $code, "status" => "deleted"));
             }
         } // foreach
@@ -413,22 +421,22 @@ class LinkController {
             if ($num_rows >= 2) return " " . $num_rows . " Links";   
         } else {
             if ($num_rows == 0) return " Nenhum Link Encurtado Salvo no Sistema";
-            if ($num_rows == 1) return " 1 URL Encurtada";
+            if ($num_rows == 1) return " <span class='is-size-1 has-text-weight-bold'>1</span><br> <span class='is-size-6'>URL Encurtada</span>";
             if ($num_rows >= 2) return "<span class='is-size-1 has-text-weight-bold'>$num_rows</span><br> <span class='is-size-6'>Total de Links</span>";
         }        
     } // contarSalvos
 
     public function contarSalvos_hoje():string {
-        // $date = date("Y-m-d"); $num_rows = $this->conexao->query("SELECT COUNT(*) FROM url_shorten WHERE added_date BETWEEN '$date 00:00:00' AND '$date 23:59:59'")->fetchColumn();
         // $day = date("d"); $num_rows = $this->conexao->query("SELECT COUNT(*) FROM url_shorten WHERE DAY(added_date) = '$day'")->fetchColumn();
-        ////
-        $num_rows = $this->conexao->query("SELECT COUNT(*) from url_shorten WHERE added_date BETWEEN DATE_FORMAT(NOW(),'%Y-%m-%d 00:00:00') AND DATE_FORMAT(NOW(),'%Y-%m-%d 23:59:59')")->fetchColumn();
+        // $num_rows = $this->conexao->query("SELECT COUNT(*) from url_shorten WHERE added_date BETWEEN DATE_FORMAT(NOW(),'%Y-%m-%d 00:00:00') AND DATE_FORMAT(NOW(),'%Y-%m-%d 23:59:59')")->fetchColumn();
+        //// COMANDOS ACIMA => não compativeis com SQLite
+        $date = date("Y-m-d");
+        $num_rows = $this->conexao->query("SELECT COUNT(*) FROM url_shorten WHERE added_date BETWEEN '$date 00:00:00' AND '$date 23:59:59'")->fetchColumn();
 
         if ($num_rows == 0) return "<span class='is-size-1 has-text-weight-bold'>$num_rows</span><br> <span class='is-size-6'>nenhum link salvo hoje</span>"; 
         if ($num_rows == 1) return "<span class='is-size-1 has-text-weight-bold'>$num_rows</span><br> <span class='is-size-6'>Encurtado Hoje</span>"; // adicionado, salvo
         if ($num_rows >= 2) return "<span class='is-size-1 has-text-weight-bold'>$num_rows</span><br> <span class='is-size-6'>Links Encurtados Hoje</span>";
     } // contarSalvos
-
 
     public function obterNomeBanco():string {
         $env = (parse_ini_file('.env')) ? parse_ini_file('.env') : getenv();
@@ -436,7 +444,21 @@ class LinkController {
         if ($connectionType == "sqlite") return "SQLite";
         if ($connectionType == "mysql") return "MySQL";
     } // obterNomeBanco
+
+    public function systemEnvironment() {
+        if (file_exists('/.dockerenv')) {
+
+            return "<p>O código e o banco de dados do sistema estão neste momento em um ambiente Docker.</p>";
+            // return "Docker";
+        }else {
+            return "";
+        }
+    } // systemEnvironment
 }
+
+
+
+
 
 
 

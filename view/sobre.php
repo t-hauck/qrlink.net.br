@@ -8,6 +8,7 @@ require_once 'info.php';
 
 $controller = new LinkController(); // Exibição de Informações na Tela
 $DB_name = $controller->obterNomeBanco();
+$environment = $controller->systemEnvironment("long");
 ?>
 
 
@@ -29,6 +30,7 @@ $DB_name = $controller->obterNomeBanco();
                 <div class="mb-5">
                     <h1 class="is-size-2 is-size-3-mobile">O que é o QR-Link?</h1>
                     <p>QR-Link é um sistema gratuito com ferramentas para encurtar URLs, criar e escanear um código QR.</p>
+                    <?= $environment ?>
                     <p>O sistema não possui login e cadastro de conta.</p>
                 </div>
 

@@ -40,9 +40,7 @@ function returnJS(){
         $js = array( "link_admin.js" );
     else $js = array();
 
-    array_unshift($js, "sweetalert2.all.min.js", "http.js", "isVisible.js", "localstorage.js", "link.js");
-    echo "<script type='text/javascript' src='/code?folder=$folder&url=dark_mode.js' async></script> ";
-
+    array_unshift($js, "dark_mode.js", "sweetalert2.all.min.js", "http.js", "isVisible.js", "localstorage.js", "link.js");
     foreach ($js as $files) { echo "<script type='text/javascript' src='/code?folder=$folder&url=$files'></script> "; }
     echo "<noscript async><meta http-equiv='refresh' content='0;url=/noscript'></noscript>";
 }

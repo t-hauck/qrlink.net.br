@@ -27,10 +27,9 @@ else
     echo "\nerro ao criar tabela 'url_shorten' \n"; 
 
 ////////
-$sql = "
-        INSERT INTO qrlink.url_shorten (original_url, short_code) VALUES (
-            'http://127.0.0.1/link_de_teste', 'teste')
-    ";
+//  $sql = "INSERT INTO url_shorten (original_url, short_code) VALUES (
+//            'http://127.0.0.1/link_de_teste', 'teste') ";
+
 if ($bd->exec($sql)) 
     echo "\nLink inserido com sucesso, short_code: teste \n"; 
 else 

@@ -57,8 +57,15 @@ $FQDN = $protocol . $domainName;
             <p class="mb-2">Não serão listados links que já não estão disponíveis, links que não tem nenhum acesso a mais de <u>3 Meses</u> são apagados automaticamente do sistema.</span>
             </p>
 
-            <div class="mb-5">
-              <button class="button is-light" id="export" style="display:none;" alt="Exportar links para um arquivo">Exportar Dados</button>
+
+            <div class="mb-3" id="local_buttons" style="display:none; align-items:center;">
+                <button class="button is-light mb-2" id="export" alt="Exportar links para um arquivo">Exportar Dados</button>
+                <br>
+
+                <label class="checkbox">
+                  <input type="checkbox" id="local_autoupdate"> Atualizar automaticamente
+                  <small id="local_autoupdate_timer"></small>
+                </label>
             </div>
 
             <table class="table is-fullwidth">
