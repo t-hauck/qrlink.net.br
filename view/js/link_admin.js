@@ -27,11 +27,11 @@ if (tabela) {
 // Apagar todos os links pelo checkbox
 var ArrayCheck_delete = [];
 document.getElementById("delete_links_all").addEventListener("click", (e) => {		
-    var marcar = e.target.checked;
     document.querySelectorAll(".delete_link").forEach(item => {
         if (item.closest('tr').style.display !== 'none') { // Verifica se o item está vísivel, para NÃO selecionar os que foram ocultados pela pesquisa
-            item.checked = marcar;
-            ArrayCheck_delete = Array.from(document.querySelectorAll('input[type=checkbox].delete_link:checked')).map(checkedItem => checkedItem.getAttribute("item-shortCode"));
+            // item.checked = e.target.checked;
+            var checked_item = document.querySelectorAll('input[type=checkbox].delete_link:checked');
+            ArrayCheck_delete = Array.from(checked_item).map(checkIT => checkIT.getAttribute("item-shortCode"));
             console.log(ArrayCheck_delete);
         }
     });
@@ -41,7 +41,8 @@ document.getElementById("delete_links_all").addEventListener("click", (e) => {
 // Apagar um único link pelo checkbox
 document.querySelectorAll(".delete_link").forEach(item => {
     item.addEventListener("click", (e) => {
-        ArrayCheck_delete = Array.from(document.querySelectorAll('input[type=checkbox].delete_link:checked')).map(checkedItem => checkedItem.getAttribute("item-shortCode"));
+        var checked_item = document.querySelectorAll('input[type=checkbox].delete_link:checked');
+        ArrayCheck_delete = Array.from(checked_item).map(checkIT => checkIT.getAttribute("item-shortCode"));
         console.log(ArrayCheck_delete);
     });
 });

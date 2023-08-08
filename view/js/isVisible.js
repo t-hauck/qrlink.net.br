@@ -3,7 +3,6 @@
 //// partes que somente serao vistas se uma condicao for satisfeita
 //// - este arquivo controla a visibilidade de elementos HTML do site
 let token = document.getElementById("formToken");
-let links_exportBtn = document.getElementById('export');
 
 ////
 // Funções utilizadas pela maioria dos arquivos de script

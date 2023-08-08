@@ -11,13 +11,17 @@ function handleFetchResponse(type, text) {
             var SwalTimer = 10000; // 10 segundos
 
             if (response.status === 405) {
-                Swal.fire({
-                    icon: "warning",
-                    title: "Atenção",
-                    html: "Este site não exige cadastro, mas para garantir sua segurança online, você deve recarregar manualmente esta página para continuar.",
-                    showConfirmButton: true,
-                    timer: SwalTimer,
-                });
+                if (type == "localstorage-error"){
+                    NextTableUpdate("", true);
+                }else {
+                    Swal.fire({
+                        icon: "warning",
+                        title: "Atenção",
+                        html: "Este site não exige cadastro, mas para garantir sua segurança online, você deve recarregar manualmente esta página para continuar.",
+                        showConfirmButton: true,
+                        timer: SwalTimer,
+                    });
+                }
                 throw error;
 
             } else if (response.status === 408) {

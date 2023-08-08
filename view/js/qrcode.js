@@ -41,14 +41,14 @@ if (submit_criarQRCode) {
 // CRIAÇÃO DE QRCODE | PÁGINA DE ESTATISTICAS
 let interval_tableQRIcon = setInterval(() => {
     const btn_tableQR = document.querySelectorAll(".qr_shortCode");
-    if (btn_tableQR) { // verifica se a classe existe no HTML: adicionada por JS via POST 
-        clearInterval(interval_tableQRIcon); // para a verificação
+    if (btn_tableQR.length > 0) { // verifica se a classe existe no HTML: adicionada por JS via POST 
         
         btn_tableQR.forEach(btn => {
             btn.addEventListener("click", (e) => {
-                let element = btn.getAttribute("short_code");
-                request_criarQR(element);
+                request_criarQR(btn.getAttribute("short_code"));
             });
-        }); // forEach
+        });
+    
+        clearInterval(interval_tableQRIcon);
     }
-}, 1000);
+}, 1000); // tempo MAIOR ou igual ao do localstorage

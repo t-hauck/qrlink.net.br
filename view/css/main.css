@@ -33,6 +33,8 @@
   transition: 1s;
 }
 
+.table tbody tr.update_deleted { background-color: #fdafaf !important; } /* ff9999 */
+
 .table tbody tr { font-weight: normal; }
 .table tbody tr a { color: #363636; }
 .table tbody tr a:hover { text-decoration: underline; }

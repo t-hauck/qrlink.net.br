@@ -1,6 +1,3 @@
-/*
-    https://htmldom.dev/export-a-table-to-csv/
-*/
 let date = ("0" + now.getDate()).slice(-2) + "-" + ("0"+(now.getMonth()+1)).slice(-2) + "-" + now.getFullYear(); // + " " + ("0" + now.getHours()).slice(-2) + ":" + ("0" + now.getMinutes()).slice(-2);
 // 16-05-2015 09:50
 
@@ -8,6 +5,7 @@ let date = ("0" + now.getDate()).slice(-2) + "-" + ("0"+(now.getMonth()+1)).slic
 
 
 let table = document.getElementById('export_table');
+let links_exportBtn = document.getElementById('export');
 
 // links_exportBtn == isVisible.js
 links_exportBtn.addEventListener('click', function () {
