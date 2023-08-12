@@ -68,7 +68,7 @@ $FQDN = $protocol . $domainName;
                 </label>
             </div>
 
-            <table class="table is-fullwidth">
+            <table class="table is-fullwidth" id="qrcode_click">
               <thead> <!-- Tabela criada para exibição dos dados no site para o usuário -->
                 <tr>
                   <th><abbr title="Ordem do link na tabela">N.</abbr></th>

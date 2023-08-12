@@ -39,16 +39,13 @@ if (submit_criarQRCode) {
 
 ////
 // CRIAÇÃO DE QRCODE | PÁGINA DE ESTATISTICAS
-let interval_tableQRIcon = setInterval(() => {
-    const btn_tableQR = document.querySelectorAll(".qr_shortCode");
-    if (btn_tableQR.length > 0) { // verifica se a classe existe no HTML: adicionada por JS via POST 
-        
-        btn_tableQR.forEach(btn => {
-            btn.addEventListener("click", (e) => {
-                request_criarQR(btn.getAttribute("short_code"));
-            });
-        });
-    
-        clearInterval(interval_tableQRIcon);
+var qrcode_eventClick = document.getElementById("qrcode_click");
+qrcode_eventClick.addEventListener("click", function(event) {
+    var clickedElement = event.target;
+
+    // verifique se o elemento clicado é o ícone/Imagem do QRCode
+    if (clickedElement.classList.contains("fa-qrcode")){
+        var qrURL = clickedElement.getAttribute("shortCode_qrURL");
+        request_criarQR(qrURL);
     }
-}, 1000); // tempo MAIOR ou igual ao do localstorage
+});

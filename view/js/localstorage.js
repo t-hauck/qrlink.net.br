@@ -128,7 +128,7 @@ function NextTableUpdate(action, error) { // 19:47
 
 function local_CreateInitialTable(res, count_TableLinks) {
     var shortCode_URL = window.location.protocol + "//" + window.location.host + "/" + res.short_code;
-    var infAction_qr = "<a href='#!' class='qr_shortCode' short_code='" + shortCode_URL + "'> <span class='icon'><i class='fas fa-qrcode' title='Gerar um QRCode para o link curto " + res.short_code + "'></i></span> </a>";
+    var infAction_qr = "<a href='#!' class='shortCode_qr'> <span class='icon'><i class='fas fa-qrcode' title='Gerar um QRCode para o link curto" + res.short_code + "' shortCode_qrURL='" + shortCode_URL + "'></i></span> </a>";
 
     if (res.short_code_password === null) {
         var hasPassword = false;
@@ -229,8 +229,8 @@ function local_RequestData(action, link_codes){
                     for (let row of table_tbody_rows) {
                         if (row.cells[3].innerText == res.short_code) {
                             row.setAttribute("title", "Item não encontrado no servidor, este link curto não está mais disponível para acessos.");
-                            row.classList.add("update_deleted", "fadeIn");
-                            row.querySelector(".qr_shortCode").remove();
+                            row.classList.add("update_deleted", "fadeIn"); // adiciona efeito CSS, e remove apenas o ícone do qrcode da tela
+                            row.querySelector(".shortCode_qr").remove();
                         }
                     };
                     for (let row of table_tbody_ext_rows) {
