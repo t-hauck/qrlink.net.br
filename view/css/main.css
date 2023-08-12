@@ -26,11 +26,13 @@
 .fadeIn {
   opacity: 1;
   transition: 1s;
+  transform: translateY(10%); /* movimento para BAIXO */
 }
 
 .fadeOut {
   opacity: 0;
   transition: 1s;
+  transform: translateY(-10%); /* movimento para cima */
 }
 
 .table tbody tr.update_deleted { background-color: #fdafaf !important; } /* ff9999 */

@@ -48,14 +48,14 @@ $navbarBurgers.forEach( el => { // Add a click event on each of them
 ////
 // apagar/Remover um bloco HTML da tela usando a classe DELETE do Bulma CSS
 // esta classe é usada em apenas um lugar, ao abrir a página o JavaScript não conhece esta classe
-// por isso, esta função é chamada depois que o conteúdo é colocado na tela
+// por isso, esta função é chamada depois que o conteúdo é adicionado na tela
 let input_statsResult = document.getElementById("input_statsResult");
 function detectDeleteAction(){
     document.querySelectorAll(".delete").forEach(btn => {
         btn.addEventListener("click", (e) => {
 
             input_statsResult.classList.add("fadeOut"); // input_statsResult.remove();
-            setTimeout(() => { input_statsResult.innerHTML = ""; }, 1000);
+            input_statsResult.innerHTML = ""; 
         });
     });
 }
@@ -255,7 +255,6 @@ if (notFound_div) {
     setInterval( function(){ 
         countTime--;
         notFound_div.innerHTML = countTime;
-
         if (countTime == 0) location.replace("/");
 
     }, 1000)
