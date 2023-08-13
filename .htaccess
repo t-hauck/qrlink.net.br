@@ -24,7 +24,7 @@ RewriteRule ^(.*)$ rotas.php [L]
 ## Bloquear acesso a dados específicos
 RewriteRule ^(.*/)?\.git+ - [R=404,L]
 RewriteRule ^(.*/)?\.env+ - [R=404,L]
-RewriteRule ^(db|testes) - [R=404,L]
+RewriteRule ^(_web_server|db|testes) - [R=404,L]
 
 ## Configurações específicas para ambiente Docker
 php_flag display_startup_errors off
