@@ -15,8 +15,8 @@ $FQDN = $protocol . $domainName;
 ?>
 
 
-  <title>Meus Links</title>
-  <meta name="description" content="Veja estatísticas dos seus links curtos: número de acessos e data da última visita. Você pode salvar seus links em um arquivo e compartilhar um QRCode.">
+  <title>Estatísticas - Meus Links Curtos</title>
+  <meta name="description" content="Veja estatísticas das duas URLs encurtadas, como o número total de acessos e data da última visita. Compartilhe seus links e gere QR Codes!">
 </head>
 <body>
 

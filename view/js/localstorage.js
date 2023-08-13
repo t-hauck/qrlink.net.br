@@ -128,7 +128,7 @@ function NextTableUpdate(action, error) { // 19:47
 
 function local_CreateInitialTable(res, count_TableLinks) {
     var shortCode_URL = window.location.protocol + "//" + window.location.host + "/" + res.short_code;
-    var infAction_qr = "<a href='#!' class='shortCode_qr'> <span class='icon'><i class='fas fa-qrcode' title='Gerar um QRCode para o link curto" + res.short_code + "' shortCode_qrURL='" + shortCode_URL + "'></i></span> </a>";
+    var infAction_qr = "<a href='#!' class='shortCode_qr'> <span class='icon'><i class='fas fa-qrcode' title='Gerar um QRCode para o link curto " + res.short_code + "' shortCode_qrURL='" + shortCode_URL + "'></i></span> </a>";
 
     if (res.short_code_password === null) {
         var hasPassword = false;
