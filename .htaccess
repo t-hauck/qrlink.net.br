@@ -2,7 +2,7 @@ DirectoryIndex rotas.php
 
 ErrorDocument 400 /?status=400
 ##ErrorDocument 401 /?status=404
-##ErrorDocument 403 /?status=404
+ErrorDocument 403 /?status=404
 ErrorDocument 404 /?status=404
 ErrorDocument 405 /?status=405
 ErrorDocument 408 /?status=408
