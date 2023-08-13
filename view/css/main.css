@@ -24,14 +24,16 @@
 
 /* CSS da página de Estatísticas */
 .fadeIn {
-  opacity: 1;
-  transition: 1s;
+  opacity: 1; transition: 1s;
+}
+
+.fadeIn_toBottom {
+  opacity: 1; transition: 1s;
   transform: translateY(10%); /* movimento para BAIXO */
 }
 
-.fadeOut {
-  opacity: 0;
-  transition: 1s;
+.fadeOut_toTop {
+  opacity: 0; transition: 1s;
   transform: translateY(-10%); /* movimento para cima */
 }
 

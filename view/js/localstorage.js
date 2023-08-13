@@ -293,19 +293,32 @@ function local_RequestData(action, link_codes){
                         };
 
                         // action = update => adicionar novos links na tabela recebidos do servidor
-                        // APENAS será executado se um novo item for adicionado em outra aba do navegador com esta página aberta 
-                        var existeNaNovaVariavel = MoreData.some((item) => item.short_code === res.short_code); // ou o LocalStorage for editado
+                        // APENAS será executado se um novo item for adicionado em outra aba do navegador com esta página aberta, ou o LocalStorage for editado
                         var existeNaTabela = table_tbody_rows_array.some((item) => {
                             const cells = item.getElementsByTagName("td");
-                            const urlCelula = cells[3].innerText;
-                            return urlCelula === res.short_code;
-                        });
+                            const urlCelula = cells[1].querySelector("a").getAttribute("href");
+                            return !res.status && urlCelula === res.url && cells[3].innerText === res.short_code;
+                        }); // res.status == deleted
 
                         // Se a url do item atual não existir nos dadosAntigos e ainda não estiver na novaVariavel, adicioná-lo à novaVariavel
-                        //// console.log("existeNaTabela [", existeNaTabela, "] existeNaNovaVariavel [", existeNaNovaVariavel, "]", res.short_code, res.url);
-                        if (!existeNaTabela && !existeNaNovaVariavel) {
+                        var existeNaNovaVariavel = MoreData.some((item) => item.url === res.url);
+                        if (!existeNaTabela && !existeNaNovaVariavel){
                             MoreData.push(res);
+                            MoreData.forEach(function(item){
+                                var count_TableTotalLinks = table_tbody.rows.length;
+                                var lastTableRowNum = table_tbody_rows[count_TableTotalLinks -1].childNodes[0].innerText;
+                                count_TableLinksOnUpdate = lastTableRowNum;
+                                count_TableLinksOnUpdate++;
+                
+                                local_CreateInitialTable(item, count_TableLinksOnUpdate);
+                
+                                // console.warn(" ");
+                                // console.table(MoreData);
+                                // console.log("count_ServerLinks [", count_ServerLinks, "] count_TableTotalLinks [", count_TableTotalLinks, "]");
+                                // console.log("count_TableLinks [", count_TableLinks, "] count_TableLinksOnUpdate [", count_TableLinksOnUpdate, "]");
+                            });
                         }
+                        // console.log("existeNaTabela [", existeNaTabela, "] existeNaNovaVariavel [", existeNaNovaVariavel, "]", res.short_code, res.url);
                     }
                 } // else, status == deleted
                 
@@ -325,21 +338,6 @@ function local_RequestData(action, link_codes){
                     `; // table_tbody.innerHTML += `
                 }
             }); // forEach pela resposta do servidor
-
-
-            MoreData.forEach(function(item){
-                var count_TableTotalLinks = table_tbody.rows.length;
-                var lastTableRowNum = table_tbody_rows[count_TableTotalLinks -1].childNodes[0].innerText;
-                count_TableLinksOnUpdate = lastTableRowNum;
-                count_TableLinksOnUpdate++;
-
-                local_CreateInitialTable(item, count_TableLinksOnUpdate);
-
-                // console.warn(" ");
-                // console.table(MoreData);
-                // console.log("count_ServerLinks [", count_ServerLinks, "] count_TableTotalLinks [", count_TableTotalLinks, "]");
-                // console.log("count_TableLinks [", count_TableLinks, "] count_TableLinksOnUpdate [", count_TableLinksOnUpdate, "]");
-            });
 
         }).catch( error => {
             handleFetchResponse("localstorage-error");

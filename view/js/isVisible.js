@@ -54,7 +54,7 @@ function detectDeleteAction(){
     document.querySelectorAll(".delete").forEach(btn => {
         btn.addEventListener("click", (e) => {
 
-            input_statsResult.classList.add("fadeOut"); // input_statsResult.remove();
+            input_statsResult.classList.add("fadeOut_toTop"); // input_statsResult.remove();
             input_statsResult.innerHTML = ""; 
         });
     });

@@ -237,8 +237,8 @@ if (submit_obterEstatisticas) {
                 }
                 
 
-                input_statsResult.classList.remove("fadeOut");
-                input_statsResult.classList.add("fadeIn");
+                input_statsResult.classList.remove("fadeOut_toTop");
+                input_statsResult.classList.add("fadeIn_toBottom");
 
                 input_statsResult.innerHTML = `
                     <article class="message is-warning">
