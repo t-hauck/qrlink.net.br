@@ -27,7 +27,9 @@ RUN sed -i 's/#LoadModule rewrite_module/LoadModule rewrite_module/g' /etc/apach
 # Use the default PHP production configuration
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
-# Disable PHP version display
+# Disable PHP/Apache version display
+RUN echo "ServerTokens ProductOnly" >> /etc/apache2/apache2.conf
+RUN echo "ServerSignature Off" >> /etc/apache2/apache2.conf
 RUN sed -i 's/expose_php = On/expose_php = Off/' "$PHP_INI_DIR/php.ini"
 
 
