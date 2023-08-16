@@ -59,7 +59,6 @@ function localStorage_link_remove(item) {
 
 
 
-
 const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 const userTimeLang = Intl.DateTimeFormat().resolvedOptions().locale;
 
@@ -71,11 +70,10 @@ function convertDateTime(sqlDate){
 	// 	return new Date().toLocaleString(userTimeLang, { timeZone: userTimeZone, dateStyle: "short" });
 	// }
     if (sqlDate == "time") { // 10:17
-        return new Date().toLocaleString(userTimeLang, { timeZone: userTimeZone, timeStyle: "short" });
-	} else{ // CONVERSÃO DE DATA DO MySQL = "2023-05-01 00:00:00"
+        return new Date().toLocaleString(userTimeLang, { timeZone: userTimeZone, timeStyle: "short" }); // , hour12: true });
+    } else{ // CONVERSÃO DE DATA DO MySQL = "2023-05-01 00:00:00"
         return new Date(sqlDate).toLocaleString(userTimeLang, { timeZone: userTimeZone, dateStyle: "short", timeStyle: "short" });
-    }
-
+	}
 }
 
 
@@ -100,12 +98,16 @@ let count_tableUpdate = 0; // Contagem do número de atualizações da tabela fe
 let timer_tableUpdate = 2; // TEMPO EM MINUTOS para "setInterval"
 let LastTableUpdateOnSuccess = "";
 
+function remove12H_AmPm(time){
+    return time.replace(/ AM| PM/g, '');
+} // remover AM/PM, se horário do USUÁRIO for de 12 horas
+
 function minutosParaMilissegundos(minutos) {
     return minutos * 60000; // 1 minuto = 60000 milissegundos
 }
 
 function NextTableUpdate(action, error) { // 19:47
-    const [hora, minutos] = convertDateTime("time").split(':').map(Number);
+    const [hora, minutos] = remove12H_AmPm(convertDateTime("time")).split(':').map(Number); // obter horário atual e remover AM/PM, se 12 horas
     const horarioObj = new Date();
     horarioObj.setHours(hora);
     horarioObj.setMinutes(minutos);
