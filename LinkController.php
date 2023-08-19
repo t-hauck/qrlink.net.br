@@ -32,6 +32,36 @@ class LinkController {
     }
 
 
+    public function urlBlocked($action, $check_URL):bool { // verificar se URL está bloqueada
+        if ($action == "check"){
+            $sql = "SELECT blocked_url FROM url_shorten WHERE original_url = :url OR short_code = :slug";
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->bindParam(":url", $check_URL, PDO::PARAM_STR);
+            $stmt->bindParam(":slug", $check_URL, PDO::PARAM_STR);
+            $stmt->execute();
+            
+            $arr = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($arr) return $arr["blocked_url"];
+            return false; // FALSE se a URL não estiver bloqueada
+        }
+        else if ($action == "block"){
+            if ($this->urlBlocked("check", $check_URL) === FALSE) {
+                $blockType = false;
+            }else { 
+                $blockType = true; // DESBLOQUEAR
+            }
+
+            $sql = "UPDATE url_shorten SET blocked_url = $blockType WHERE original_url = :url OR short_code = :slug";
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->bindParam(":url", $check_URL, PDO::PARAM_STR);
+            $stmt->bindParam(":slug", $check_URL, PDO::PARAM_STR);
+            $sqlResult = $stmt->execute();
+
+            if (!$sqlResult) return false;
+            return $sqlResult; 
+        }
+    }
+
     public function Link($REQUEST_link, $REQUEST_passwd){ // $url = (object) $REQUEST["inputURL"]
         $url = addslashes($REQUEST_link);
         $passwd = addslashes($REQUEST_passwd);
@@ -43,36 +73,37 @@ class LinkController {
             if(strpos($url, $FQDN) !== false) {
                 header("Content-type: application/json");
                 echo json_encode([ "status" => "error", "message" => "Você não pode encurtar uma URL deste site. <br><br>O QRLink pode ser acessado pelo endereço <span style='text-decoration:underline;'>$FQDN</span>" ]) ;
-                exit();
+                exit;
             }
             
             // Encurtamento de Links
-            if ($this->get_new_shortURL($url)) {
+            if ($this->urlBlocked("check", $url) === FALSE) {
+                if ($this->get_new_shortURL($url)) {
+                    header("Content-type: application/json");
+                    echo json_encode([ "short_code" => $this->get_new_shortURL($url) ]) ;
+                }
+                else if ($this->save_new_shortURL($url, $passwd)) {
+                    header("Content-type: application/json");
+                    echo json_encode([ "short_code" => $this->get_new_shortURL($url) ]) ;
+                }
+                else { // retorno FALSE da verificação feita pela função "save_new_shortURL"
+                    header("Content-type: application/json");
+                    echo json_encode([ "status" => "error", "message" => "A senha de acesso é inválida. <br>Tente novamente." ]) ;
+                }
+            }else {
                 header("Content-type: application/json");
-                echo json_encode([ "short_code" => $this->get_new_shortURL($url) ]) ;
-                exit();
+                echo json_encode([ "status" => "error", "message" => "Este endereço não é permitido." ]) ;
             }
-            else if ($this->save_new_shortURL($url, $passwd)) {
-                header("Content-type: application/json");
-                echo json_encode([ "short_code" => $this->get_new_shortURL($url) ]) ;
-                exit();
-            }
-            else { // retorno FALSE da verificação feita pela função "save_new_shortURL"
-                header("Content-type: application/json");
-                echo json_encode([ "status" => "error", "message" => "A senha de acesso é inválida. <br>Tente novamente." ]) ;
-                exit();
-            }
-        }
-        else  { // return FALSE;
+        }else  { // return FALSE;
             header("Content-type: application/json");
             echo json_encode([ "status" => "error", "message" => "A URL informada é inválida. <br>Tente novamente." ]) ;
-            exit();
         }
+        exit;
     }
     private function get_new_shortURL($url):string {
-        $sql = "SELECT short_code FROM url_shorten WHERE original_url = :fqdn";
+        $sql = "SELECT short_code FROM url_shorten WHERE original_url = :url";
         $stmt = $this->conexao->prepare($sql);
-        $stmt->bindParam(":fqdn", $url, PDO::PARAM_STR);
+        $stmt->bindParam(":url", $url, PDO::PARAM_STR);
         $stmt->execute(); // será retornado apenas um resultado do banco
         
         $arr = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -130,9 +161,9 @@ class LinkController {
         $num_rows = $this->conexao->query("SELECT COUNT(*) FROM url_shorten WHERE original_url = '$FQDN'")->fetchColumn(); 
 
         if ($num_rows) {
-            $sql = "SELECT short_code FROM url_shorten WHERE original_url = :fqdn";
+            $sql = "SELECT short_code FROM url_shorten WHERE original_url = :url";
             $stmt = $this->conexao->prepare($sql);
-            $stmt->bindParam(":fqdn", $FQDN, PDO::PARAM_STR);
+            $stmt->bindParam(":url", $FQDN, PDO::PARAM_STR);
             $stmt->execute();
             
             $arr = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -154,65 +185,66 @@ class LinkController {
             else if ($URL_query[1]) $link_code = $URL_query[1]; // qrlink.net.br/b4b9df
         }
 
-        $num_rows   = $this->conexao->query("SELECT COUNT(*) FROM url_shorten WHERE short_code = '$link_code'")->fetchColumn();
+        $num_rows = $this->conexao->query("SELECT COUNT(*) FROM url_shorten WHERE short_code = '$link_code'")->fetchColumn();
 
         if ($num_rows) {
-            // $sql = "SELECT original_url, short_code, access, last_access, short_code_password FROM url_shorten WHERE short_code = :slug";
-           $sql = "SELECT * FROM url_shorten WHERE short_code = :slug";
+            if ($this->urlBlocked("check", $link_code) === FALSE) {
+                $sql = "SELECT * FROM url_shorten WHERE short_code = :slug";
 
-            $stmt = $this->conexao->prepare($sql);
-            $stmt->bindParam(":slug", $link_code, PDO::PARAM_STR);
-            $stmt->execute();
+                $stmt = $this->conexao->prepare($sql);
+                $stmt->bindParam(":slug", $link_code, PDO::PARAM_STR);
+                $stmt->execute();
 
-            $arr = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                $arr = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            if ($link_code == $this->system_ShortCode) { // retorna dados personalizados caso o código seja o do próprio sistema
-                foreach ($arr as $item) { ///// sistema = SEM SENHA
-                    $systemArray = [
-                        "url" => $item["original_url"],
-                        "short_code" => $item["short_code"],
-                        "access" => "0",
-                        "last_access" => "-", // "0000-00-00 00:00:00",
-                        "short_code_password" => $item["short_code_password"] // NULL
-                    ];
+                if ($link_code == $this->system_ShortCode) { // retorna dados personalizados caso o código seja o do próprio sistema
+                    foreach ($arr as $item) { ///// sistema = SEM SENHA
+                        $systemArray = [
+                            "url" => $item["original_url"],
+                            "short_code" => $item["short_code"],
+                            "access" => "0",
+                            "last_access" => "-", // "0000-00-00 00:00:00",
+                            "short_code_password" => $item["short_code_password"] // NULL
+                        ];
 
-                    header("Content-type: application/json");
-                    echo json_encode([ $systemArray ]);
-                    exit();
+                        header("Content-type: application/json");
+                        echo json_encode([ $systemArray ]);
+                    }
                 }
-            }
-            foreach ($arr as $item) { // Tratamento para exibição da senha para o usuário
-                if ($item["short_code_password"] == NULL) { // LINK NÃO TEM SENHA == NULL
-                    $passwdArray = [
-                        "url" => $item["original_url"],
-                        "short_code" => $item["short_code"],
-                        "access" => $item["access"],
-                        "last_access" => $item["last_access"],
-                        "short_code_password" => $item["short_code_password"] // NULL
-                    ];
-                    header("Content-type: application/json");
-                    echo json_encode([ $passwdArray ]);
-                    exit();
-                } else { // FOI CADASTRADA UMA SENHA DE ACESSO PARA O LINK
-                    $passwdArray = [
-                        "url" => $item["original_url"],
-                        "short_code" => $item["short_code"],
-                        "access" => $item["access"],
-                        "last_access" => $item["last_access"],
-                        "short_code_password" => "-", // não enviar o HASH da senha
-                        "password_access_attempts" => $item["access_attempts"],         // NULL
-                        "password_last_access_attempt" => $item["last_access_attempt"], // NULL
-                    ];
-                    header("Content-type: application/json");
-                    echo json_encode([ $passwdArray ]);
-                    exit();
+                foreach ($arr as $item) { // Tratamento para exibição da senha para o usuário
+                    if ($item["short_code_password"] == NULL) { // LINK NÃO TEM SENHA == NULL
+                        $passwdArray = [
+                            "url" => $item["original_url"],
+                            "short_code" => $item["short_code"],
+                            "access" => $item["access"],
+                            "last_access" => $item["last_access"],
+                            "short_code_password" => $item["short_code_password"] // NULL
+                        ];
+                        header("Content-type: application/json");
+                        echo json_encode([ $passwdArray ]);
+                    } else { // FOI CADASTRADA UMA SENHA DE ACESSO PARA O LINK
+                        $passwdArray = [
+                            "url" => $item["original_url"],
+                            "short_code" => $item["short_code"],
+                            "access" => $item["access"],
+                            "last_access" => $item["last_access"],
+                            "short_code_password" => "-", // não enviar o HASH da senha
+                            "password_access_attempts" => $item["access_attempts"],         // NULL
+                            "password_last_access_attempt" => $item["last_access_attempt"], // NULL
+                        ];
+                        header("Content-type: application/json");
+                        echo json_encode([ $passwdArray ]);
+                    }
                 }
+            }else { // $this->urlBlocked == FALSE
+                header("Content-type: application/json");
+                echo json_encode([ "status" => "error", "message" => "Não foram encontrados dados sobre o código <span style='text-decoration:underline;'>$link_code</span> <br><br>Verifique se este é um link curto válido. Insira no campo de texto o código curto que foi gerado para o seu link quando foi encurtado, ou o endereço completo para o acesso. Exemplo: $this->system_ShortCode" ]) ;
             }
-        } else { // return FALSE;
+        }else { // $num_rows return FALSE;
             header("Content-type: application/json");
             echo json_encode([ "status" => "error", "message" => "Não foram encontrados dados sobre o código <span style='text-decoration:underline;'>$link_code</span> <br><br>Verifique se este é um link curto válido. Insira no campo de texto o código curto que foi gerado para o seu link quando foi encurtado, ou o endereço completo para o acesso. Exemplo: $this->system_ShortCode" ]) ;
-            exit();
         }
+        exit;
     }
     
     
@@ -246,35 +278,39 @@ class LinkController {
                         array_push($codeData, array("short_code" => $code, "status" => "deleted"));
                     } else{
 
-                        // Tratamento para exibição da senha para o usuário, não há tratamento no PHP para "último acesso"
-                        if ($item["short_code_password"] == NULL) { // LINK NÃO TEM SENHA
-                            $passwdArray = [
-                                "url" => $item["original_url"],
-                                "short_code" => $item["short_code"],
-                                "access" => $item["access"],
-                                "last_access" => $item["last_access"],
-                                "short_code_password" => $item["short_code_password"], // NULL
-                            ];
-                        } else { // FOI CADASTRADA UMA SENHA DE ACESSO PARA O LINK
-                            if ($item["access_attempts"] == NULL) {
-                                    $value_PasswordAccessAttempts = "-";
-                            }else { $value_PasswordAccessAttempts = $item["access_attempts"]; }
-                            if ($item["last_access_attempt"] == NULL) {
-                                    $value_PasswordLastAccessAttempt = "-";
-                            }else { $value_PasswordLastAccessAttempt = $item["last_access_attempt"]; }
+                        if ($this->urlBlocked("check", $code) === FALSE) {
+                            // Tratamento para exibição da senha para o usuário, não há tratamento no PHP para "último acesso"
+                            if ($item["short_code_password"] == NULL) { // LINK NÃO TEM SENHA
+                                $passwdArray = [
+                                    "url" => $item["original_url"],
+                                    "short_code" => $item["short_code"],
+                                    "access" => $item["access"],
+                                    "last_access" => $item["last_access"],
+                                    "short_code_password" => $item["short_code_password"], // NULL
+                                ];
+                            } else { // FOI CADASTRADA UMA SENHA DE ACESSO PARA O LINK
+                                if ($item["access_attempts"] == NULL) {
+                                        $value_PasswordAccessAttempts = "-";
+                                }else { $value_PasswordAccessAttempts = $item["access_attempts"]; }
+                                if ($item["last_access_attempt"] == NULL) {
+                                        $value_PasswordLastAccessAttempt = "-";
+                                }else { $value_PasswordLastAccessAttempt = $item["last_access_attempt"]; }
 
-                            $passwdArray = [
-                                "url" => $item["original_url"],
-                                "short_code" => $item["short_code"],
-                                "access" => $item["access"],
-                                "last_access" => $item["last_access"],
-                                "short_code_password" => "-", // não enviar o HASH da senha
-                                "password_access_attempts" => $value_PasswordAccessAttempts,        // default = NULL
-                                "password_last_access_attempt" => $value_PasswordLastAccessAttempt, // default = NULL
-                            ];
+                                $passwdArray = [
+                                    "url" => $item["original_url"],
+                                    "short_code" => $item["short_code"],
+                                    "access" => $item["access"],
+                                    "last_access" => $item["last_access"],
+                                    "short_code_password" => "-", // não enviar o HASH da senha
+                                    "password_access_attempts" => $value_PasswordAccessAttempts,        // default = NULL
+                                    "password_last_access_attempt" => $value_PasswordLastAccessAttempt, // default = NULL
+                                ];
+                            }
+                            array_push($codeData, $passwdArray);
+                        }else {// $this->urlBlocked
+                            array_push($codeData, array("short_code" => $code, "status" => "deleted"));
                         }
-                        array_push($codeData, $passwdArray);
-                    } // else
+                    }
 
                     break;
                 }
@@ -304,17 +340,22 @@ class LinkController {
         if ($method == "GET") { // GET => /bb0376
 
             if (!empty($arr)) { // verifica se $arr não está vazio = SQL SELECT retornou dados
-                if ($arr[0]["short_code_password"] == NULL) {
-                    if ( $this->redirect_updateDB($short_code) ) {
-                        header("Location:" . $arr[0]["original_url"] );
-                        exit;
-                    } else {
-                        header("Location: /");
+                if ($this->urlBlocked("check", $short_code) === FALSE) {
+
+                    if ($arr[0]["short_code_password"] == NULL) {
+                        if ( $this->redirect_updateDB($short_code) ) {
+                            header("Location:" . $arr[0]["original_url"] );
+                            exit;
+                        } else {
+                            header("Location: /");
+                            exit;
+                        }
+                    } else { // EXIBIÇÃO html DO FORMULÁRIO PARA ACESSO A UM LINK PROTEGIDO POR SENHA
+                        require_once 'view/redirect_pass.php'; // ..e o ELSE IF abaixo verifica a senha
                         exit;
                     }
-                } else { // EXIBIÇÃO html DO FORMULÁRIO PARA ACESSO A UM LINK PROTEGIDO POR SENHA
-                    require_once 'view/redirect_pass.php'; // ..e o ELSE IF abaixo verifica a senha
-                    exit;
+                }else { // LINK BLOQUEADO = acesso não permitido => // $this->urlBlocked
+                    $_SESSION['DB_URLNotFound'] = TRUE;
                 }
             } else { // LINK NÃO ENCONTRADO, rotas.php continua com erro 404
                 $_SESSION['DB_URLNotFound'] = TRUE;

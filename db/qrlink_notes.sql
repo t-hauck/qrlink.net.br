@@ -1,6 +1,7 @@
--- ALTER TABLE `url_shorten` MODIFY `url` TEXT;
--- ALTER TABLE url_shorten ADD short_code_password TEXT NULL;
-
+ALTER TABLE `url_shorten` MODIFY `url` TEXT;
+ALTER TABLE url_shorten ADD short_code_password TEXT NULL;
+ALTER TABLE qrlink.url_shorten ADD blocked_url BOOLEAN NOT NULL DEFAULT FALSE;
+UPDATE qrlink.url_shorten SET blocked_url = true WHERE short_code = '4387ea';
 
 
 -- ### ---

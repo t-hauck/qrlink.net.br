@@ -12,5 +12,7 @@ CREATE TABLE IF NOT EXISTS qrlink.url_shorten (
         access_attempts int(11) NULL,
         last_access_attempt timestamp NULL,
 
-        added_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        added_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+        blocked_url BOOLEAN NOT NULL DEFAULT FALSE
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
