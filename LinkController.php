@@ -66,7 +66,7 @@ class LinkController {
         $url = addslashes($REQUEST_link);
         $passwd = addslashes($REQUEST_passwd);
 
-        if (filter_var($url, FILTER_VALIDATE_URL)) {
+        if(parse_url($url, PHP_URL_SCHEME) && parse_url($url, PHP_URL_HOST)) { // if (filter_var($url, FILTER_VALIDATE_URL)) {
 
             // Verifica se o link contém o domínio atual do sistema
             $FQDN = $_SERVER['HTTP_HOST'];
