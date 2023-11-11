@@ -2,7 +2,7 @@
 /*
     - Script para apagar automaticamente links do banco que não tenham nenhum acesso a algum tempo
     - Execute este script UMA VEZ para adicionar uma linha na CRONTAB
-    UPDATE qrlink.url_shorten SET last_acess = '2010-10-01 00:00:00' WHERE short_code = '5556af';
+    UPDATE qrlink.url_shorten SET last_access = '2010-10-01 00:00:00' WHERE short_code = '5556af';
 
     - Remove a chamada deste script da crontab
         cat /etc/crontab |grep -v '$SCRIPT_DIR' > /etc/crontab.tmp
@@ -41,7 +41,7 @@ if ($CRON == FALSE) {
 $conexao = Conectar::sql();
 $AutoDelete_tSql = "3 MONTH"; // 1 YEAR
 
-$sql = "SELECT * FROM url_shorten WHERE last_acess < CURRENT_TIMESTAMP() - INTERVAL $AutoDelete_tSql";
+$sql = "SELECT * FROM url_shorten WHERE last_access < CURRENT_TIMESTAMP() - INTERVAL $AutoDelete_tSql";
 $result_select = $conexao->query($sql);
 $list = $result_select->fetchAll(PDO::FETCH_ASSOC);
 
@@ -51,7 +51,7 @@ if ( count($list) == 0 ){ //  return false;
     exit;
 } else {
         
-    $sql = "DELETE FROM url_shorten WHERE last_acess < CURRENT_TIMESTAMP() - INTERVAL $AutoDelete_tSql";
+    $sql = "DELETE FROM url_shorten WHERE last_access < CURRENT_TIMESTAMP() - INTERVAL $AutoDelete_tSql";
     $result_delete = $conexao->query($sql);
     if (!$result_delete){
         echo "  \nFalha ao executar DELETE no Banco de Dados";
