@@ -16,3 +16,8 @@ CREATE TABLE IF NOT EXISTS qrlink.url_shorten (
 
         blocked_url BOOLEAN NOT NULL DEFAULT FALSE
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+-- Criação de evento para apagar automaticamente links sem acessos, não compativel com SQLite
+-- - para banco de dados SQLite, usar script autoDelete.sqlite.php
+-- Evento inicia no dia em que for criado, e será executado sempre a meia-noite
+CREATE EVENT IF NOT EXISTS qrlink.delete_links_without_access ON SCHEDULE EVERY 1 DAY STARTS TIMESTAMP(CURRENT_DATE, '00:00:00') DO DELETE FROM qrlink.url_shorten WHERE last_access < (NOW() - INTERVAL 3 MONTH);
