@@ -1,7 +1,7 @@
 <?php
 
 class Conectar {
-    public static function sql (){ // centralizando as configurações do banco de dados no arquivo ".env"
+    public static function sql (){
         $env = (parse_ini_file('.env')) ? parse_ini_file('.env') : getenv();
         $connectionType = $env["databaseType"];
         $database = $env["database"];
@@ -38,25 +38,4 @@ class Conectar {
         }
 
     } // function sql
-
-    public static function executeSQLFromFile(PDO $pdo, $sqlFilePath) {
-        $sqlCommands = file_get_contents($sqlFilePath);
-        $sqlCommands = trim($sqlCommands);
-
-        // Separa os comandos usando o ponto e vírgula como delimitador
-        $commands = explode(";", $sqlCommands);
-
-        foreach ($commands as $command) {
-            $command = trim($command);
-            if (!empty($command)) {
-                $pdo->exec($command);
-            }
-        }
-    } // function executeSQLFromFile
 } // class
-
-
-if (file_exists('/.dockerenv')) {
-    $pdo = Conectar::sql();
-    Conectar::executeSQLFromFile($pdo, "db/qrlink.sql");
-}
