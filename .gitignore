@@ -1,2 +1,6 @@
 # .env
+db/links.db
 db/backup
+_web_server/docker/ssl_certs/*
+_web_server/docker/apache_logs/*
+_web_server/docker/mysql_data/*
