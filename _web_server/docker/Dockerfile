@@ -1,11 +1,13 @@
-# Use the official PHP Apache image for PHP 8.1
-FROM php:8.1-apache
+# Use the official PHP Apache image for PHP
+FROM php:8.2-apache
 
 ENV TZ=America/Sao_Paulo
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
+# Install necessary packages
 RUN apt update && apt upgrade -y && \
     apt install -y \
+        vim nano \
         libsqlite3-dev \
         && docker-php-ext-install pdo pdo_mysql pdo_sqlite
 
@@ -32,6 +34,8 @@ RUN echo "ServerTokens ProductOnly" >> /etc/apache2/apache2.conf
 RUN echo "ServerSignature Off" >> /etc/apache2/apache2.conf
 RUN sed -i 's/expose_php = On/expose_php = Off/' "$PHP_INI_DIR/php.ini"
 
+# Set PHP max execution time to 3 minutes (180 seconds) => LinkController.php > generateUniqueID()
+RUN sed -i 's/max_execution_time = 30/max_execution_time = 180/' "$PHP_INI_DIR/php.ini"
 
 # Expose ports 80 and 443 for Apache
 EXPOSE 80

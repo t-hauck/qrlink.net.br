@@ -1,0 +1,41 @@
+.table-container {
+  position: relative;
+}
+.table_container__menu {
+  /* Absolute position */
+  position: absolute;
+
+  /* Reset */
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+
+  /* Misc */
+  color: black;
+  background-color: #f7fafc;
+  border: 1px solid #cbd5e0;
+  border-radius: 0.25rem;
+  padding: 0.5rem;
+}
+.table_container__menu--hidden {
+  display: none;
+}
+
+/*.table {
+  border-collapse: collapse;
+}
+.table,
+.table th,
+.table td {
+  border: 1px solid #ccc;
+}
+.table th,
+.table td {
+  padding: 0.5rem;
+}*/
+
+.table th {
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
+}

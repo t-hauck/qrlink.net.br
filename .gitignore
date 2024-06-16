@@ -1,12 +1,6 @@
-# .env
-db/links.db
-db/backup
-
-_web_server/docker/ssl_certs/*
-!_web_server/docker/ssl_certs/.gitkeep
-
-_web_server/docker/apache_logs/*
-!_web_server/docker/apache_logs/.gitkeep
-
-_web_server/docker/mysql_data/*
-!_web_server/docker/mysql_data/.gitkeep
+.env
+app/database/links.db
+app/database/backup
+_web_server/docker/ssl_certs
+_web_server/docker/apache_logs
+_web_server/docker/mysql_data

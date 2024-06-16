@@ -1,19 +1,7 @@
 version: '3.9'
 services:
-  qrlink:
-    container_name: qrlink
-    restart: always
-    build:
-      context: .
-      dockerfile: ./Dockerfile
-    ports:
-      - "8102:443"
-    volumes:
-      - /var/www/hauck.net.br/qrlink:/var/www/html
-      - ./apache_logs:/var/log/apache2
-
-  mysql-docker:
-    container_name: mysql
+  qrlink-db:
+    container_name: qrlink-db
     image: ubuntu/mysql:8.0-20.04_beta
     restart: always
     ports:
@@ -22,5 +10,26 @@ services:
       TZ: America/Sao_Paulo
       MYSQL_ROOT_PASSWORD: "l=,m%hL*YUStEP+,0uVR"
       MYSQL_DATABASE: qrlink
+    networks:
+      - qrlink
     volumes:
       - ./mysql_data:/var/lib/mysql
+  
+  qrlink:
+    container_name: qrlink
+    restart: always
+    depends_on:
+      - qrlink-db
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - "8102:443"
+    networks:
+      - qrlink
+    volumes:
+      - /var/www/websites/qrlink.net.br:/var/www/html
+      - ./apache_logs:/var/log/apache2
+
+networks:
+  qrlink:

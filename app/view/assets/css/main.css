@@ -1,0 +1,42 @@
+body,
+section,
+footer {
+    background-color: whitesmoke;
+}
+
+.hover_click {
+  cursor: pointer;
+}
+
+/* CSS da página principal */
+.hover_click.ferramentas {
+  padding: 0.20rem; /* classe Bulma = column */
+}
+.hover_click.ferramentas:hover {
+  background-color: var(--light_blue);
+}
+
+/* tamanho de imagens da página principal */
+.image.is-220x220 {
+  height: 220px;
+  width: 220px;
+}
+
+/* CSS da página de Estatísticas */
+.fadeIn {
+  opacity: 1; transition: 500ms;
+}
+
+.fadeOut {
+  opacity: 0.5; transition: 500ms; /* 0.5 => 50% de transparencia */
+}
+
+.fadeIn_toBottom {
+  opacity: 1; transition: 1s;
+  transform: translateY(10%); /* movimento para BAIXO */
+}
+
+/* .fadeOut_toTop {
+  opacity: 0; transition: 1s;
+  transform: translateY(-10%); movimento para cima
+} */

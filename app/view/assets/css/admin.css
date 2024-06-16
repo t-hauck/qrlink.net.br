@@ -1,0 +1,98 @@
+/*
+  https://codepen.io/netzzwerg/pen/aPBGWq
+*/
+
+
+/* .main {
+  / margin-left: 13rem; position: relative; /
+  margin-left: 6rem;
+  margin-right: 6rem; 
+
+  padding-left: 2rem;
+  padding-right: 2rem;
+} */
+
+
+.main header {
+  line-height: 18px;
+}
+.main header h2 {
+  font-size: 24px;
+  font-weight: 600;
+  padding-bottom: 0.5rem;
+}
+.main header hr {
+  background-color: transparent;
+  /* border-top: 1px solid #3b414c; */
+}
+.main header small {
+  color: #949ba2;
+  text-align: right;
+}
+
+.main:before {
+  content: "";
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  z-index: -2;
+  left: 0;
+  right: 0;
+  background-image: -webkit-radial-gradient(top, circle cover, #353944 0%, #272b32 70%);
+  background-image: -moz-radial-gradient(center, circle cover, #353944 0%, #272b32 70%);
+  background-image: -o-radial-gradient(center, circle cover, #353944 0%, #272b32 70%);
+  background-image: radial-gradient(center, circle cover, #353944 0%, #272b32 70%);
+  background-position: 50%, 50%;
+}
+
+.main {
+  margin-top: 3.25rem;
+  padding-top: 2rem;
+}
+
+.box hr {
+  background-color: #3b414c;
+}
+
+.box.accent {
+  background-color: #ffa500;
+}
+.box.accent .subtitle {
+  color: #ffffff;
+}
+
+.pagination-link,
+.pagination-next,
+.pagination-previous {
+  border-color: #949ba2;
+  color: #949ba2;
+}
+
+.pagination-link.is-current,
+.pagination-link:hover,
+.pagination-next:hover,
+.pagination-previous:hover {
+  background-color: transparent;
+  border-color: #ffffff;
+  color: #ffffff;
+}
+
+/* overwrite bulma, try to resolve with variables */
+.box {
+  background-color: #3b414c;
+}
+
+.content h1,
+.content h2,
+.content h3,
+.content h4,
+.content h5,
+.content h6,
+.title,
+.tile {
+  color: #ffffff;
+}
+
+.subtitle {
+  color: #949ba2;
+}

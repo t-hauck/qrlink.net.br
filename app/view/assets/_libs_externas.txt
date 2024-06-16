@@ -1,0 +1,18 @@
+# Lista de arquivos externos utilizados pelo sistema
+Ao atualizar ou adicionar algo novo utilizar o arquivo minificado, se houver, e remover comentário de copyright.
+Ao importar os arquivos no HTML sempre utilizar o "css_Js.php" e o "gz.php".
+
+
+- bulma.io v1.0.1, v0.9.4
+bulma.min.css
+
+- sweetalert2 v11.11.1, v11.10.3
+sweetalert2.min.css, sweetalert2.all.min.js
+
+- Font Awesome Free Web v6.5.2, v6.5.1
+-- instruções: substituir no arquivo "all.css" de acordo com tratamento do *.htaccess*
+    - ../webfonts/
+    + /assets/fonts/fontawesome/
+
+- HTML5 QRCode v2.3.8
+html5-qrcode.min.js

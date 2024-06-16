@@ -5,6 +5,7 @@
  * -----------------------------------------------------------------------------------------
 **/
 $_FQDN = "https://{$_SERVER['HTTP_HOST']}";
+$FOLDER = $_SERVER["DOCUMENT_ROOT"] . "/app/view/assets/";
 
 
 
@@ -16,18 +17,18 @@ if ( isset($_GET["folder"]) && isset($_GET["url"]) && !empty($_GET["folder"]) &&
     if (strpos($folder, "styles") !== FALSE){
         if (($pos = strpos($folder, "/")) !== FALSE) { // caso tenha uma sub-pasta
             $sub_folder = substr($folder, $pos+1);
-            $folder = "view/css/$sub_folder";
-        } else { $folder = "view/css/"; } // caso não tenha sub-pasta, apenas 'view/css'
+            $folder = $FOLDER . "css/$sub_folder";
+        } else { $folder = $FOLDER . "css/"; } // caso não tenha sub-pasta, apenas 'view/css'
     } else if (strpos($folder, "fontawesome") !== FALSE){
         if (($pos = strpos($folder, "/")) !== FALSE) {
             $sub_folder = substr($folder, $pos+1);
-            $folder = "view/fonts/fontawesome/$sub_folder";
-        } else { $folder = "view/fonts/fontawesome/"; }
+            $folder = $FOLDER . "fonts/fontawesome/$sub_folder";
+        } else { $folder = $FOLDER . "fonts/fontawesome/"; }
     } else if (strpos($folder, "scripts") !== FALSE){
         if (($pos = strpos($folder, "/")) !== FALSE) {
             $sub_folder = substr($folder, $pos+1);
-            $folder = "view/js/$sub_folder";
-        } else { $folder = "view/js/"; }
+            $folder = $FOLDER . "js/$sub_folder";
+        } else { $folder = $FOLDER . "js/"; }
     } else {
         header("HTTP/1.1 404 Not Found ");
         exit;

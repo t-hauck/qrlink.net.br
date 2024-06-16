@@ -36,8 +36,8 @@ fi
 MAX_TRIES=30
 while [ "$MAX_TRIES" -gt 0 ]; do
     if mysql -u "$user" -p"$pass" --port 33306 -e "SHOW DATABASES;" > /dev/null 2>&1; then
-      docker-compose exec qrlink php /var/www/html/db/createDatabase.php
-      echo -e "PHP Executado: db/createDatabase.php \n"
+      docker-compose exec qrlink php /var/www/html/app/database/createDatabase.php
+      [[ $? -eq 0 ]] && echo -e "PHP Executado: createDatabase.php \n"
       break
     else
       echo "Tentando conexão com servidor MySQL. Restam $MAX_TRIES tentativas."
@@ -50,17 +50,3 @@ if [ "$MAX_TRIES" -eq 0 ]; then
     echo "- Falha ao conectar ao servidor MySQL"
     exit 1
 fi
-
-
-
-
-
-
-
-#docker build --tag qrlink . || exit
-#docker run -d --name qrlink \
-#   -p 8101:80  \
-#   -p 8102:443 \
-#   -v $HostBasePath:/var/www/html \
-#   -v $HostWEB_Logs:/var/log/apache2 \
-#   qrlink || exit
