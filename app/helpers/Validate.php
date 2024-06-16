@@ -35,7 +35,7 @@ function token_validate(){ // Verifica se token existe e corresponde ao gerado
   if (isset($headers["Csrf-Token"])) $token = $headers["Csrf-Token"];
   if (isset($headers["CSRF-Token"])) $token = $headers["CSRF-Token"];
 
-	if (!isset($token) && !hash_equals($token, $_SESSION['submitToken'])) {
+  if (!isset($token) || !isset($_SESSION['submitToken'])) {
     Http::status(401); // 400
     throw new Exception("CSRF token not found");
   }
