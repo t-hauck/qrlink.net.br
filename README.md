@@ -36,7 +36,7 @@ As chaves que não salvarem nenhum link em 1 ano serão apagadas automaticamente
 O sistema permitirá cadastro e visualização de estatísticas de links apenas se informado o token gerado anteriormente.
 
 ### Requisitos
-- PHP >= 8.2
+- PHP >= 8.0
 - MySQL >= 8.0
 - MariaDB >= 10.6.16
 - Apache >= 2.4
